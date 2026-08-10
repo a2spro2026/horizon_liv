@@ -38,6 +38,7 @@ class AdminController extends Controller
             'livreurs',
             'fiche-livreur',
             'etat-livraison',
+            'carte-livreurs',
             'rapports',
             'configurations',
             'admin',
@@ -254,6 +255,57 @@ class AdminController extends Controller
         return redirect()->route('admin.section', 'fiche-livreur');
     }
 
+    public function updateLivreurPosition(Request $request)
+    {
+        $validated = $request->validate([
+            'contact' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        if (empty($validated['contact']) && empty($validated['email'])) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Contact ou e-mail requis.',
+            ], 422);
+        }
+
+        $query = Livreur::query()->where('statut', 'actif');
+
+        if (! empty($validated['contact'])) {
+            $query->where('contact', $validated['contact']);
+        } else {
+            $query->where('email', $validated['email']);
+        }
+
+        $livreur = $query->first();
+
+        if (! $livreur) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Livreur introuvable ou suspendu.',
+            ], 404);
+        }
+
+        $livreur->update([
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'derniere_position_at' => now(),
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'livreur' => [
+                'id' => $livreur->id,
+                'nom_complet' => $livreur->nom_complet,
+                'latitude' => $livreur->latitude,
+                'longitude' => $livreur->longitude,
+                'derniere_position_at' => $livreur->derniere_position_at?->toIso8601String(),
+            ],
+        ]);
+    }
+
     private function render(string $section): View|RedirectResponse
     {
         if (! session('auth_user')) {
@@ -295,6 +347,15 @@ class AdminController extends Controller
 
         if ($section === 'fiche-livreur') {
             $livreurs = Livreur::query()->latest()->get();
+        }
+
+        if ($section === 'carte-livreurs') {
+            $livreurs = Livreur::query()
+                ->where('statut', 'actif')
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('nom_complet')
+                ->get();
         }
 
         if ($section === 'etat-livraison') {

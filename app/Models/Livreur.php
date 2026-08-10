@@ -14,11 +14,25 @@ class Livreur extends Model
         'ville',
         'type_paiement',
         'statut',
+        'latitude',
+        'longitude',
+        'derniere_position_at',
+    ];
+
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'derniere_position_at' => 'datetime',
     ];
 
     public function isSuspendu(): bool
     {
         return $this->statut === 'suspendu';
+    }
+
+    public function hasPosition(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
     }
 
     public function etatLivraisons(): HasMany
