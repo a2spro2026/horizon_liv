@@ -64,8 +64,8 @@ class AdminController extends Controller
                 'telephone' => $inscription->telephone,
                 'email' => $inscription->email,
                 'ville' => $inscription->ville,
-                'type_partenaire' => 'Magasin',
-                'mode_paiement' => 'Virement',
+                'statue' => 'Divers',
+                'activite' => $inscription->magasin,
                 'statut' => 'actif',
                 'magasin' => $inscription->magasin,
                 'banque' => $inscription->banque,
@@ -95,19 +95,19 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nom_client' => 'required|string|max:255',
             'telephone' => 'required|string|max:30',
+            'statue' => 'required|in:Rev,Ste,Divers',
             'ville' => 'required|string|max:255',
-            'type_partenaire' => 'required|string|max:100',
-            'mode_paiement' => 'required|string|max:100',
+            'activite' => 'required|string|max:255',
         ]);
 
-        $email = strtolower(Str::slug($validated['nom_client'], '.')) . '@horizonpost.local';
+        $email = strtolower(Str::slug($validated['nom_client'], '.')) . '.' . Str::lower(Str::random(4)) . '@horizonpost.local';
 
         Partenaire::create([
             'nom_client' => $validated['nom_client'],
             'telephone' => $validated['telephone'],
+            'statue' => $validated['statue'],
             'ville' => $validated['ville'],
-            'type_partenaire' => $validated['type_partenaire'],
-            'mode_paiement' => $validated['mode_paiement'],
+            'activite' => $validated['activite'],
             'statut' => 'actif',
             'cin' => '',
             'email' => $email,
@@ -130,9 +130,9 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nom_client' => 'required|string|max:255',
             'telephone' => 'required|string|max:30',
+            'statue' => 'required|in:Rev,Ste,Divers',
             'ville' => 'required|string|max:255',
-            'type_partenaire' => 'required|string|max:100',
-            'mode_paiement' => 'required|string|max:100',
+            'activite' => 'required|string|max:255',
         ]);
 
         $partenaire->update($validated);

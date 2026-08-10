@@ -628,6 +628,8 @@
             padding: 0.75rem 0.55rem;
             border-bottom: 1px solid var(--line);
             color: var(--text);
+            text-align: center;
+            vertical-align: middle;
         }
 
         .data-table th,
@@ -1396,28 +1398,21 @@
                                     <input id="add_contact" type="text" name="telephone" placeholder="00212..." required>
                                 </div>
                                 <div class="field">
+                                    <label for="add_statue">Statue</label>
+                                    <select id="add_statue" name="statue" required>
+                                        <option value="">Choisir</option>
+                                        <option value="Rev">Rev</option>
+                                        <option value="Ste">Ste</option>
+                                        <option value="Divers">Divers</option>
+                                    </select>
+                                </div>
+                                <div class="field">
                                     <label for="add_ville">Ville</label>
                                     <input id="add_ville" type="text" name="ville" required>
                                 </div>
-                                <div class="field">
-                                    <label for="add_type">Type Partenaire</label>
-                                    <select id="add_type" name="type_partenaire" required>
-                                        <option value="">Choisir</option>
-                                        <option value="Magasin">Magasin</option>
-                                        <option value="Agence">Agence</option>
-                                        <option value="Entreprise">Entreprise</option>
-                                        <option value="Particulier">Particulier</option>
-                                    </select>
-                                </div>
                                 <div class="field" style="grid-column: 1 / -1;">
-                                    <label for="add_paiement">Mode Paiement</label>
-                                    <select id="add_paiement" name="mode_paiement" required>
-                                        <option value="">Choisir</option>
-                                        <option value="Espèces">Espèces</option>
-                                        <option value="Virement">Virement</option>
-                                        <option value="Chèque">Chèque</option>
-                                        <option value="Carte">Carte</option>
-                                    </select>
+                                    <label for="add_activite">Activité</label>
+                                    <input id="add_activite" type="text" name="activite" required>
                                 </div>
                             </div>
                             <div class="add-actions">
@@ -1438,9 +1433,9 @@
                                         <th>ID</th>
                                         <th>Nom Partenaire</th>
                                         <th>Contact</th>
+                                        <th>Statue</th>
                                         <th>Ville</th>
-                                        <th>Type Partenaire</th>
-                                        <th>Mode Paiement</th>
+                                        <th>Activité</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1451,18 +1446,18 @@
                                             data-id="{{ $p->id }}"
                                             data-nom="{{ $p->nom_client }}"
                                             data-contact="{{ $p->telephone }}"
+                                            data-statue="{{ $p->statue }}"
                                             data-ville="{{ $p->ville }}"
-                                            data-type="{{ $p->type_partenaire }}"
-                                            data-paiement="{{ $p->mode_paiement }}"
+                                            data-activite="{{ $p->activite }}"
                                             data-date="{{ $p->created_at->format('d/m/Y') }}"
                                         >
                                             <td>{{ $p->created_at->format('d/m/Y') }}</td>
                                             <td>{{ $p->id }}</td>
                                             <td>{{ $p->nom_client }}</td>
                                             <td>{{ $p->telephone }}</td>
+                                            <td>{{ $p->statue ?: '—' }}</td>
                                             <td>{{ $p->ville }}</td>
-                                            <td>{{ $p->type_partenaire ?: '—' }}</td>
-                                            <td>{{ $p->mode_paiement ?: '—' }}</td>
+                                            <td>{{ $p->activite ?: '—' }}</td>
                                             <td>
                                                 <div class="actions">
                                                     <button type="button" class="icon-btn" title="Voir" onclick="openPartenaireModal('view', this.closest('tr'))" aria-label="Voir">
@@ -1553,25 +1548,16 @@
                 <div class="field"><label>ID</label><input id="m_id" type="text" disabled></div>
                 <div class="field"><label>Nom Partenaire</label><input id="m_nom" name="nom_client" type="text" required></div>
                 <div class="field"><label>Contact</label><input id="m_contact" name="telephone" type="text" required></div>
+                <div class="field">
+                    <label>Statue</label>
+                    <select id="m_statue" name="statue" required>
+                        <option value="Rev">Rev</option>
+                        <option value="Ste">Ste</option>
+                        <option value="Divers">Divers</option>
+                    </select>
+                </div>
                 <div class="field"><label>Ville</label><input id="m_ville" name="ville" type="text" required></div>
-                <div class="field">
-                    <label>Type Partenaire</label>
-                    <select id="m_type" name="type_partenaire" required>
-                        <option value="Magasin">Magasin</option>
-                        <option value="Agence">Agence</option>
-                        <option value="Entreprise">Entreprise</option>
-                        <option value="Particulier">Particulier</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Mode Paiement</label>
-                    <select id="m_paiement" name="mode_paiement" required>
-                        <option value="Espèces">Espèces</option>
-                        <option value="Virement">Virement</option>
-                        <option value="Chèque">Chèque</option>
-                        <option value="Carte">Carte</option>
-                    </select>
-                </div>
+                <div class="field"><label>Activité</label><input id="m_activite" name="activite" type="text" required></div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-close" onclick="closePartenaireModal()">Fermer</button>
                     <button type="submit" class="btn btn-add" id="modal-save">Valider</button>
@@ -1630,12 +1616,12 @@
             document.getElementById('m_id').value = id;
             document.getElementById('m_nom').value = row.dataset.nom;
             document.getElementById('m_contact').value = row.dataset.contact;
+            document.getElementById('m_statue').value = row.dataset.statue || 'Divers';
             document.getElementById('m_ville').value = row.dataset.ville;
-            document.getElementById('m_type').value = row.dataset.type || 'Magasin';
-            document.getElementById('m_paiement').value = row.dataset.paiement || 'Virement';
+            document.getElementById('m_activite').value = row.dataset.activite || '';
 
             const editable = mode === 'edit';
-            ['m_nom','m_contact','m_ville','m_type','m_paiement'].forEach((fid) => {
+            ['m_nom','m_contact','m_statue','m_ville','m_activite'].forEach((fid) => {
                 document.getElementById(fid).disabled = !editable;
             });
 

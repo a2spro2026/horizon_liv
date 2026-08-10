@@ -14,6 +14,8 @@ class Partenaire extends Model
         'telephone',
         'email',
         'ville',
+        'statue',
+        'activite',
         'type_partenaire',
         'mode_paiement',
         'statut',
