@@ -25,3 +25,5 @@ Route::patch('/admin/partenaires/{partenaire}/suspendre', [AdminController::clas
     ->name('admin.partenaires.suspend');
 Route::delete('/admin/partenaires/{partenaire}', [AdminController::class, 'destroyPartenaire'])
     ->name('admin.partenaires.destroy');
+Route::post('/admin/destinataires', [AdminController::class, 'storeDestinataire'])
+    ->name('admin.destinataires.store');

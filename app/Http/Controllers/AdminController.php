@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Destinataire;
 use App\Models\Inscription;
+use App\Models\LivraisonHistorique;
 use App\Models\Partenaire;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,6 +25,10 @@ class AdminController extends Controller
             'partenaires',
             'fiche-partenaire',
             'balance-partenaire',
+            'destinataires',
+            'fiche-destinataire',
+            'historique-livraison',
+            'balances-paiement',
             'commandes',
             'paiement',
             'parametres',
@@ -39,6 +45,10 @@ class AdminController extends Controller
 
         if ($section === 'partenaires') {
             return redirect()->route('admin.section', 'fiche-partenaire');
+        }
+
+        if ($section === 'destinataires') {
+            return redirect()->route('admin.section', 'fiche-destinataire');
         }
 
         return $this->render($section);
@@ -164,6 +174,24 @@ class AdminController extends Controller
         return redirect()->route('admin.section', 'fiche-partenaire');
     }
 
+    public function storeDestinataire(Request $request): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_complet' => 'required|string|max:255',
+            'contact' => 'required|string|max:30',
+            'ville' => 'required|string|max:255',
+            'activite' => 'required|string|max:255',
+        ]);
+
+        Destinataire::create($validated);
+
+        return redirect()->route('admin.section', 'fiche-destinataire');
+    }
+
     private function render(string $section): View|RedirectResponse
     {
         if (! session('auth_user')) {
@@ -173,6 +201,8 @@ class AdminController extends Controller
         $nvxCount = Inscription::enAttente()->count();
         $inscriptions = collect();
         $partenaires = collect();
+        $destinataires = collect();
+        $livraisonHistoriques = collect();
 
         if ($section === 'nvx-insc') {
             $inscriptions = Inscription::query()
@@ -185,12 +215,28 @@ class AdminController extends Controller
             $partenaires = Partenaire::query()->latest()->get();
         }
 
+        if (in_array($section, ['fiche-destinataire', 'balances-paiement'], true)) {
+            $destinataires = Destinataire::query()
+                ->with('historiques')
+                ->latest()
+                ->get();
+        }
+
+        if ($section === 'historique-livraison') {
+            $livraisonHistoriques = LivraisonHistorique::query()
+                ->with('destinataire')
+                ->latest()
+                ->get();
+        }
+
         return view('admin.dashboard', [
             'user' => session('auth_user'),
             'section' => $section,
             'nvxCount' => $nvxCount,
             'inscriptions' => $inscriptions,
             'partenaires' => $partenaires,
+            'destinataires' => $destinataires,
+            'livraisonHistoriques' => $livraisonHistoriques,
         ]);
     }
 }

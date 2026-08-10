@@ -849,6 +849,39 @@
 
         html[data-theme="dark"] .status-badge.suspendu { color: #fca5a5; }
 
+        .etat-badge {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .etat-badge.confirmee {
+            background: rgba(34, 197, 94, 0.18);
+            color: #16a34a;
+        }
+
+        .etat-badge.annulee {
+            background: rgba(239, 68, 68, 0.18);
+            color: #dc2626;
+        }
+
+        .etat-badge.retour {
+            background: rgba(245, 158, 11, 0.2);
+            color: #d97706;
+        }
+
+        .etat-badge.reportee {
+            background: rgba(59, 130, 246, 0.18);
+            color: #2563eb;
+        }
+
+        html[data-theme="dark"] .etat-badge.confirmee { color: #86efac; }
+        html[data-theme="dark"] .etat-badge.annulee { color: #fca5a5; }
+        html[data-theme="dark"] .etat-badge.retour { color: #fcd34d; }
+        html[data-theme="dark"] .etat-badge.reportee { color: #93c5fd; }
+
         tr.is-suspended td {
             opacity: 0.72;
         }
@@ -1093,11 +1126,17 @@
 </head>
 <body>
     @php
+        $destinataireSections = ['fiche-destinataire', 'historique-livraison', 'balances-paiement'];
+        $compactSections = array_merge(['fiche-partenaire', 'balance-partenaire'], $destinataireSections);
         $titles = [
             'dashboard' => 'Tableau de Bord',
             'partenaires' => 'Partenaires',
             'fiche-partenaire' => 'Fiche Partenaire',
             'balance-partenaire' => 'Balance Partenaire',
+            'destinataires' => 'Destinataires',
+            'fiche-destinataire' => 'Fiche Destinataire',
+            'historique-livraison' => 'Historique Livraison',
+            'balances-paiement' => 'Balances Paiement',
             'commandes' => 'Commandes',
             'paiement' => 'État Paiement',
             'parametres' => 'Paramètres',
@@ -1240,6 +1279,43 @@
                         </li>
                     </ul>
                 </li>
+                <li class="side-group {{ in_array($section, $destinataireSections, true) ? 'open has-active' : '' }}" id="destinataires-group">
+                    <button type="button" class="side-parent" id="destinataires-toggle" aria-expanded="{{ in_array($section, $destinataireSections, true) ? 'true' : 'false' }}">
+                        <span class="side-parent-left">
+                            <span class="side-ico" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </span>
+                            Destinataires
+                        </span>
+                        <span class="side-caret" aria-hidden="true"></span>
+                    </button>
+                    <ul class="sub-links">
+                        <li>
+                            <a href="{{ route('admin.section', 'fiche-destinataire') }}" class="{{ $section === 'fiche-destinataire' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg>
+                                </span>
+                                Fiche Destinataire
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.section', 'historique-livraison') }}" class="{{ $section === 'historique-livraison' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                </span>
+                                Historique Livraison
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.section', 'balances-paiement') }}" class="{{ $section === 'balances-paiement' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h4a3 3 0 0 1 0 6H5m14-3h-5a3 3 0 0 0 0 6h5"/></svg>
+                                </span>
+                                Balances Paiement
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li>
                     <a href="{{ route('admin.section', 'commandes') }}" class="{{ $section === 'commandes' ? 'active' : '' }}">
                         <span class="side-ico" aria-hidden="true">
@@ -1282,10 +1358,10 @@
             </div>
         </aside>
 
-        <main class="content {{ in_array($section, ['fiche-partenaire', 'balance-partenaire'], true) ? 'is-compact' : '' }}">
-            <h1 class="page-title {{ in_array($section, ['fiche-partenaire', 'balance-partenaire'], true) ? 'is-hidden' : '' }}">{{ $title }}</h1>
+        <main class="content {{ in_array($section, $compactSections, true) ? 'is-compact' : '' }}">
+            <h1 class="page-title {{ in_array($section, $compactSections, true) ? 'is-hidden' : '' }}">{{ $title }}</h1>
 
-            @if (session('admin_success') && $section !== 'fiche-partenaire')
+            @if (session('admin_success') && ! in_array($section, ['fiche-partenaire', 'fiche-destinataire'], true))
                 <div class="alert-ok">{{ session('admin_success') }}</div>
             @endif
 
@@ -1298,7 +1374,7 @@
                 </div>
             @endif
 
-            <section class="panel {{ $section === 'fiche-partenaire' ? 'is-flush' : '' }}">
+            <section class="panel {{ in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement'], true) ? 'is-flush' : '' }}">
                 @if ($section === 'nvx-insc')
                     <h3>Nouvelle inscription</h3>
                     @if (($inscriptions ?? collect())->isEmpty())
@@ -1486,6 +1562,224 @@
                         </div>
                     @endif
 
+                @elseif ($section === 'fiche-destinataire')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Destinataires</small>
+                                Fiche Destinataire
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-add" id="open-add-destinataire">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="add-panel" id="add-destinataire-panel">
+                        <h4>Nouveau destinataire</h4>
+                        <form method="POST" action="{{ route('admin.destinataires.store') }}">
+                            @csrf
+                            <div class="add-grid">
+                                <div class="field">
+                                    <label for="add_d_nom">Nom Complet</label>
+                                    <input id="add_d_nom" type="text" name="nom_complet" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_d_contact">Contact</label>
+                                    <input id="add_d_contact" type="text" name="contact" placeholder="00212..." required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_d_ville">Ville</label>
+                                    <input id="add_d_ville" type="text" name="ville" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_d_activite">Activité</label>
+                                    <input id="add_d_activite" type="text" name="activite" required>
+                                </div>
+                            </div>
+                            <div class="add-actions">
+                                <button type="submit" class="btn btn-add">Valider</button>
+                                <button type="button" class="btn btn-close" id="close-add-destinataire">Fermer</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if (($destinataires ?? collect())->isEmpty())
+                        <div id="destinataires-list">
+                            <p class="empty-state">Aucun destinataire pour le moment.</p>
+                        </div>
+                    @else
+                        <div class="table-wrap" id="destinataires-list">
+                            <table class="data-table" id="destinataires-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>ID</th>
+                                        <th>Nom Complet</th>
+                                        <th>Contact</th>
+                                        <th>Ville</th>
+                                        <th>Activité</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($destinataires as $d)
+                                        <tr
+                                            data-id="{{ $d->id }}"
+                                            data-nom="{{ $d->nom_complet }}"
+                                            data-contact="{{ $d->contact }}"
+                                            data-ville="{{ $d->ville }}"
+                                            data-activite="{{ $d->activite }}"
+                                            data-date="{{ $d->created_at->format('d/m/Y') }}"
+                                        >
+                                            <td>{{ $d->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $d->id }}</td>
+                                            <td>{{ $d->nom_complet }}</td>
+                                            <td>{{ $d->contact }}</td>
+                                            <td>{{ $d->ville }}</td>
+                                            <td>{{ $d->activite }}</td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button type="button" class="icon-btn" title="Voir" onclick="openDestinataireModal(this.closest('tr'))" aria-label="Voir">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Imprimer" onclick="printDestinataireRow(this.closest('tr'))" aria-label="Imprimer">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                @elseif ($section === 'historique-livraison')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Destinataires</small>
+                                Historique Livraison
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+                    @if (($livraisonHistoriques ?? collect())->isEmpty())
+                        <p class="empty-state">Aucun historique de livraison pour le moment.</p>
+                    @else
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Nom Complet</th>
+                                        <th>Nombres Cmd</th>
+                                        <th>Etat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($livraisonHistoriques as $h)
+                                        <tr>
+                                            <td>{{ $h->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $h->destinataire?->nom_complet ?? '—' }}</td>
+                                            <td>{{ $h->nombres_cmd }}</td>
+                                            <td>
+                                                <span class="etat-badge {{ $h->etat }}">
+                                                    {{ \App\Models\LivraisonHistorique::etatLabel($h->etat) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                @elseif ($section === 'balances-paiement')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 3v18M5 8h4a3 3 0 0 1 0 6H5m14-3h-5a3 3 0 0 0 0 6h5"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Destinataires</small>
+                                Balances Paiement
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+                    @if (($destinataires ?? collect())->isEmpty())
+                        <p class="empty-state">Aucune balance de paiement pour le moment.</p>
+                    @else
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom Complet</th>
+                                        <th>Activité</th>
+                                        <th>Nbrs Cmd Confirmée</th>
+                                        <th>Total Paiement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($destinataires as $d)
+                                        @php
+                                            $confirmees = $d->historiques->where('etat', 'confirmee');
+                                            $nbrs = (int) $confirmees->sum('nombres_cmd');
+                                            $total = (float) $confirmees->sum('total_paiement');
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $d->id }}</td>
+                                            <td>{{ $d->nom_complet }}</td>
+                                            <td>{{ $d->activite }}</td>
+                                            <td>{{ $nbrs }}</td>
+                                            <td>{{ number_format($total, 2, '.', ' ') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
                 @elseif ($section === 'balance-partenaire')
                     <h3>Balance Partenaire</h3>
                     @if (($partenaires ?? collect())->isEmpty())
@@ -1570,6 +1864,22 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="destinataire-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h3>Voir destinataire</h3>
+            <div class="field"><label>Date</label><input id="d_date" type="text" disabled></div>
+            <div class="field"><label>ID</label><input id="d_id" type="text" disabled></div>
+            <div class="field"><label>Nom Complet</label><input id="d_nom" type="text" disabled></div>
+            <div class="field"><label>Contact</label><input id="d_contact" type="text" disabled></div>
+            <div class="field"><label>Ville</label><input id="d_ville" type="text" disabled></div>
+            <div class="field"><label>Activité</label><input id="d_activite" type="text" disabled></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-close" onclick="closeDestinataireModal()">Fermer</button>
+                <button type="button" class="btn btn-add" onclick="printDestinataireModal()">Imprimer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const toggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -1593,6 +1903,16 @@
             );
         });
 
+        const destinatairesToggle = document.getElementById('destinataires-toggle');
+        const destinatairesGroup = document.getElementById('destinataires-group');
+        destinatairesToggle?.addEventListener('click', () => {
+            destinatairesGroup.classList.toggle('open');
+            destinatairesToggle.setAttribute(
+                'aria-expanded',
+                destinatairesGroup.classList.contains('open') ? 'true' : 'false'
+            );
+        });
+
         const addPanel = document.getElementById('add-partenaire-panel');
         const partenairesList = document.getElementById('partenaires-list');
         document.getElementById('open-add-partenaire')?.addEventListener('click', () => {
@@ -1602,6 +1922,17 @@
         document.getElementById('close-add-partenaire')?.addEventListener('click', () => {
             addPanel?.classList.remove('open');
             if (partenairesList) partenairesList.style.display = '';
+        });
+
+        const addDestPanel = document.getElementById('add-destinataire-panel');
+        const destinatairesList = document.getElementById('destinataires-list');
+        document.getElementById('open-add-destinataire')?.addEventListener('click', () => {
+            addDestPanel?.classList.add('open');
+            if (destinatairesList) destinatairesList.style.display = 'none';
+        });
+        document.getElementById('close-add-destinataire')?.addEventListener('click', () => {
+            addDestPanel?.classList.remove('open');
+            if (destinatairesList) destinatairesList.style.display = '';
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
@@ -1643,6 +1974,33 @@
 
         document.getElementById('partenaire-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'partenaire-modal') closePartenaireModal();
+        });
+
+        function openDestinataireModal(row) {
+            document.getElementById('d_date').value = row.dataset.date;
+            document.getElementById('d_id').value = row.dataset.id;
+            document.getElementById('d_nom').value = row.dataset.nom;
+            document.getElementById('d_contact').value = row.dataset.contact;
+            document.getElementById('d_ville').value = row.dataset.ville;
+            document.getElementById('d_activite').value = row.dataset.activite;
+            document.getElementById('destinataire-modal').classList.add('open');
+        }
+
+        function closeDestinataireModal() {
+            document.getElementById('destinataire-modal').classList.remove('open');
+        }
+
+        function printDestinataireRow(row) {
+            openDestinataireModal(row);
+            setTimeout(() => window.print(), 150);
+        }
+
+        function printDestinataireModal() {
+            window.print();
+        }
+
+        document.getElementById('destinataire-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'destinataire-modal') closeDestinataireModal();
         });
     </script>
 </body>
