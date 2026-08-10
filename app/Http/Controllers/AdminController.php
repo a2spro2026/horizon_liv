@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Destinataire;
 use App\Models\Inscription;
 use App\Models\LivraisonHistorique;
+use App\Models\Livreur;
 use App\Models\Partenaire;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class AdminController extends Controller
             'parametres',
             'nvx-insc',
             'livreurs',
+            'fiche-livreur',
             'rapports',
             'configurations',
             'admin',
@@ -49,6 +51,10 @@ class AdminController extends Controller
 
         if ($section === 'destinataires') {
             return redirect()->route('admin.section', 'fiche-destinataire');
+        }
+
+        if ($section === 'livreurs') {
+            return redirect()->route('admin.section', 'fiche-livreur');
         }
 
         return $this->render($section);
@@ -192,6 +198,60 @@ class AdminController extends Controller
         return redirect()->route('admin.section', 'fiche-destinataire');
     }
 
+    public function storeLivreur(Request $request): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_complet' => 'required|string|max:255',
+            'contact' => 'required|string|max:30',
+            'email' => 'required|email|max:255',
+            'ville' => 'required|string|max:255',
+            'type_paiement' => 'required|in:Salaire,Commission,Pourcentage',
+        ]);
+
+        Livreur::create([
+            ...$validated,
+            'statut' => 'actif',
+        ]);
+
+        return redirect()->route('admin.section', 'fiche-livreur');
+    }
+
+    public function updateLivreur(Request $request, Livreur $livreur): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_complet' => 'required|string|max:255',
+            'contact' => 'required|string|max:30',
+            'email' => 'required|email|max:255',
+            'ville' => 'required|string|max:255',
+            'type_paiement' => 'required|in:Salaire,Commission,Pourcentage',
+        ]);
+
+        $livreur->update($validated);
+
+        return redirect()->route('admin.section', 'fiche-livreur');
+    }
+
+    public function suspendLivreur(Livreur $livreur): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $livreur->update([
+            'statut' => $livreur->statut === 'suspendu' ? 'actif' : 'suspendu',
+        ]);
+
+        return redirect()->route('admin.section', 'fiche-livreur');
+    }
+
     private function render(string $section): View|RedirectResponse
     {
         if (! session('auth_user')) {
@@ -203,6 +263,7 @@ class AdminController extends Controller
         $partenaires = collect();
         $destinataires = collect();
         $livraisonHistoriques = collect();
+        $livreurs = collect();
 
         if ($section === 'nvx-insc') {
             $inscriptions = Inscription::query()
@@ -229,6 +290,10 @@ class AdminController extends Controller
                 ->get();
         }
 
+        if ($section === 'fiche-livreur') {
+            $livreurs = Livreur::query()->latest()->get();
+        }
+
         return view('admin.dashboard', [
             'user' => session('auth_user'),
             'section' => $section,
@@ -237,6 +302,7 @@ class AdminController extends Controller
             'partenaires' => $partenaires,
             'destinataires' => $destinataires,
             'livraisonHistoriques' => $livraisonHistoriques,
+            'livreurs' => $livreurs,
         ]);
     }
 }

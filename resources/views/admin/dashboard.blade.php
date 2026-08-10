@@ -1127,7 +1127,12 @@
 <body>
     @php
         $destinataireSections = ['fiche-destinataire', 'historique-livraison', 'balances-paiement'];
-        $compactSections = array_merge(['fiche-partenaire', 'balance-partenaire'], $destinataireSections);
+        $livreurSections = ['fiche-livreur'];
+        $compactSections = array_merge(
+            ['fiche-partenaire', 'balance-partenaire'],
+            $destinataireSections,
+            $livreurSections
+        );
         $titles = [
             'dashboard' => 'Tableau de Bord',
             'partenaires' => 'Partenaires',
@@ -1143,6 +1148,7 @@
             'admin' => 'Admin',
             'nvx-insc' => 'Nouvelles Inscriptions',
             'livreurs' => 'Livreurs',
+            'fiche-livreur' => 'Fiche Livreur',
             'rapports' => 'Rapports',
             'configurations' => 'Configurations',
         ];
@@ -1174,7 +1180,7 @@
                     <span class="badge">{{ $nvxCount }}</span>
                 @endif
             </a>
-            <a href="{{ route('admin.section', 'livreurs') }}" class="{{ $section === 'livreurs' ? 'active' : '' }}">
+            <a href="{{ route('admin.section', 'fiche-livreur') }}" class="{{ in_array($section, $livreurSections, true) ? 'active' : '' }}">
                 <span class="nav-ico" aria-hidden="true">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 18H3V7a1 1 0 0 1 1-1h9l4 5h3a2 2 0 0 1 2 2v5h-2"/><path d="M13 6v5h5"/></svg>
                 </span>
@@ -1316,6 +1322,27 @@
                         </li>
                     </ul>
                 </li>
+                <li class="side-group {{ in_array($section, $livreurSections, true) ? 'open has-active' : '' }}" id="livreurs-group">
+                    <button type="button" class="side-parent" id="livreurs-toggle" aria-expanded="{{ in_array($section, $livreurSections, true) ? 'true' : 'false' }}">
+                        <span class="side-parent-left">
+                            <span class="side-ico" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 18H3V7a1 1 0 0 1 1-1h9l4 5h3a2 2 0 0 1 2 2v5h-2"/><path d="M13 6v5h5"/></svg>
+                            </span>
+                            Livreurs
+                        </span>
+                        <span class="side-caret" aria-hidden="true"></span>
+                    </button>
+                    <ul class="sub-links">
+                        <li>
+                            <a href="{{ route('admin.section', 'fiche-livreur') }}" class="{{ $section === 'fiche-livreur' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg>
+                                </span>
+                                Fiche Livreur
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li>
                     <a href="{{ route('admin.section', 'commandes') }}" class="{{ $section === 'commandes' ? 'active' : '' }}">
                         <span class="side-ico" aria-hidden="true">
@@ -1361,7 +1388,7 @@
         <main class="content {{ in_array($section, $compactSections, true) ? 'is-compact' : '' }}">
             <h1 class="page-title {{ in_array($section, $compactSections, true) ? 'is-hidden' : '' }}">{{ $title }}</h1>
 
-            @if (session('admin_success') && ! in_array($section, ['fiche-partenaire', 'fiche-destinataire'], true))
+            @if (session('admin_success') && ! in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'fiche-livreur'], true))
                 <div class="alert-ok">{{ session('admin_success') }}</div>
             @endif
 
@@ -1374,7 +1401,7 @@
                 </div>
             @endif
 
-            <section class="panel {{ in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement'], true) ? 'is-flush' : '' }}">
+            <section class="panel {{ in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur'], true) ? 'is-flush' : '' }}">
                 @if ($section === 'nvx-insc')
                     <h3>Nouvelle inscription</h3>
                     @if (($inscriptions ?? collect())->isEmpty())
@@ -1780,6 +1807,135 @@
                         </div>
                     @endif
 
+                @elseif ($section === 'fiche-livreur')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 18H3V7a1 1 0 0 1 1-1h9l4 5h3a2 2 0 0 1 2 2v5h-2"/><path d="M13 6v5h5"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Livreurs</small>
+                                Fiche Livreur
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-add" id="open-add-livreur">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="add-panel" id="add-livreur-panel">
+                        <h4>Nouveau livreur</h4>
+                        <form method="POST" action="{{ route('admin.livreurs.store') }}">
+                            @csrf
+                            <div class="add-grid">
+                                <div class="field">
+                                    <label for="add_l_nom">Nom Complet</label>
+                                    <input id="add_l_nom" type="text" name="nom_complet" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_l_contact">Contact</label>
+                                    <input id="add_l_contact" type="text" name="contact" placeholder="00212..." required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_l_email">E-mail</label>
+                                    <input id="add_l_email" type="email" name="email" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_l_ville">Ville</label>
+                                    <input id="add_l_ville" type="text" name="ville" required>
+                                </div>
+                                <div class="field" style="grid-column: 1 / -1;">
+                                    <label for="add_l_paiement">Type Paiement</label>
+                                    <select id="add_l_paiement" name="type_paiement" required>
+                                        <option value="">Choisir</option>
+                                        <option value="Salaire">Salaire</option>
+                                        <option value="Commission">Commission</option>
+                                        <option value="Pourcentage">Pourcentage</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="add-actions">
+                                <button type="submit" class="btn btn-add">Valider</button>
+                                <button type="button" class="btn btn-close" id="close-add-livreur">Fermer</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if (($livreurs ?? collect())->isEmpty())
+                        <div id="livreurs-list">
+                            <p class="empty-state">Aucun livreur pour le moment.</p>
+                        </div>
+                    @else
+                        <div class="table-wrap" id="livreurs-list">
+                            <table class="data-table" id="livreurs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>ID</th>
+                                        <th>Nom Complet</th>
+                                        <th>Contact</th>
+                                        <th>E-mail</th>
+                                        <th>Ville</th>
+                                        <th>Type Paiement</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($livreurs as $l)
+                                        <tr
+                                            class="{{ ($l->statut ?? 'actif') === 'suspendu' ? 'is-suspended' : '' }}"
+                                            data-id="{{ $l->id }}"
+                                            data-nom="{{ $l->nom_complet }}"
+                                            data-contact="{{ $l->contact }}"
+                                            data-email="{{ $l->email }}"
+                                            data-ville="{{ $l->ville }}"
+                                            data-paiement="{{ $l->type_paiement }}"
+                                            data-date="{{ $l->created_at->format('d/m/Y') }}"
+                                        >
+                                            <td>{{ $l->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $l->id }}</td>
+                                            <td>{{ $l->nom_complet }}</td>
+                                            <td>{{ $l->contact }}</td>
+                                            <td>{{ $l->email }}</td>
+                                            <td>{{ $l->ville }}</td>
+                                            <td>{{ $l->type_paiement }}</td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button type="button" class="icon-btn" title="Voir" onclick="openLivreurModal('view', this.closest('tr'))" aria-label="Voir">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Modifier" onclick="openLivreurModal('edit', this.closest('tr'))" aria-label="Modifier">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                    </button>
+                                                    <form method="POST" action="{{ route('admin.livreurs.suspend', $l) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="icon-btn warn" title="{{ ($l->statut ?? 'actif') === 'suspendu' ? 'Réactiver' : 'Suspendre' }}" aria-label="Suspendre">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 15V9M14 15V9"/></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
                 @elseif ($section === 'balance-partenaire')
                     <h3>Balance Partenaire</h3>
                     @if (($partenaires ?? collect())->isEmpty())
@@ -1880,6 +2036,34 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="livreur-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h3 id="livreur-modal-title">Livreur</h3>
+            <form method="POST" id="livreur-form">
+                @csrf
+                @method('PUT')
+                <div class="field"><label>Date</label><input id="l_date" type="text" disabled></div>
+                <div class="field"><label>ID</label><input id="l_id" type="text" disabled></div>
+                <div class="field"><label>Nom Complet</label><input id="l_nom" name="nom_complet" type="text" required></div>
+                <div class="field"><label>Contact</label><input id="l_contact" name="contact" type="text" required></div>
+                <div class="field"><label>E-mail</label><input id="l_email" name="email" type="email" required></div>
+                <div class="field"><label>Ville</label><input id="l_ville" name="ville" type="text" required></div>
+                <div class="field">
+                    <label>Type Paiement</label>
+                    <select id="l_paiement" name="type_paiement" required>
+                        <option value="Salaire">Salaire</option>
+                        <option value="Commission">Commission</option>
+                        <option value="Pourcentage">Pourcentage</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-close" onclick="closeLivreurModal()">Fermer</button>
+                    <button type="submit" class="btn btn-add" id="livreur-modal-save">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const toggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -1913,6 +2097,16 @@
             );
         });
 
+        const livreursToggle = document.getElementById('livreurs-toggle');
+        const livreursGroup = document.getElementById('livreurs-group');
+        livreursToggle?.addEventListener('click', () => {
+            livreursGroup.classList.toggle('open');
+            livreursToggle.setAttribute(
+                'aria-expanded',
+                livreursGroup.classList.contains('open') ? 'true' : 'false'
+            );
+        });
+
         const addPanel = document.getElementById('add-partenaire-panel');
         const partenairesList = document.getElementById('partenaires-list');
         document.getElementById('open-add-partenaire')?.addEventListener('click', () => {
@@ -1933,6 +2127,17 @@
         document.getElementById('close-add-destinataire')?.addEventListener('click', () => {
             addDestPanel?.classList.remove('open');
             if (destinatairesList) destinatairesList.style.display = '';
+        });
+
+        const addLivreurPanel = document.getElementById('add-livreur-panel');
+        const livreursList = document.getElementById('livreurs-list');
+        document.getElementById('open-add-livreur')?.addEventListener('click', () => {
+            addLivreurPanel?.classList.add('open');
+            if (livreursList) livreursList.style.display = 'none';
+        });
+        document.getElementById('close-add-livreur')?.addEventListener('click', () => {
+            addLivreurPanel?.classList.remove('open');
+            if (livreursList) livreursList.style.display = '';
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
@@ -2001,6 +2206,38 @@
 
         document.getElementById('destinataire-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'destinataire-modal') closeDestinataireModal();
+        });
+
+        function openLivreurModal(mode, row) {
+            const modal = document.getElementById('livreur-modal');
+            const form = document.getElementById('livreur-form');
+            const id = row.dataset.id;
+            form.action = `/admin/livreurs/${id}`;
+
+            document.getElementById('l_date').value = row.dataset.date;
+            document.getElementById('l_id').value = id;
+            document.getElementById('l_nom').value = row.dataset.nom;
+            document.getElementById('l_contact').value = row.dataset.contact;
+            document.getElementById('l_email').value = row.dataset.email;
+            document.getElementById('l_ville').value = row.dataset.ville;
+            document.getElementById('l_paiement').value = row.dataset.paiement || 'Salaire';
+
+            const editable = mode === 'edit';
+            ['l_nom','l_contact','l_email','l_ville','l_paiement'].forEach((fid) => {
+                document.getElementById(fid).disabled = !editable;
+            });
+
+            document.getElementById('livreur-modal-title').textContent = editable ? 'Modifier livreur' : 'Voir livreur';
+            document.getElementById('livreur-modal-save').style.display = editable ? 'inline-block' : 'none';
+            modal.classList.add('open');
+        }
+
+        function closeLivreurModal() {
+            document.getElementById('livreur-modal').classList.remove('open');
+        }
+
+        document.getElementById('livreur-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'livreur-modal') closeLivreurModal();
         });
     </script>
 </body>

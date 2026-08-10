@@ -27,3 +27,9 @@ Route::delete('/admin/partenaires/{partenaire}', [AdminController::class, 'destr
     ->name('admin.partenaires.destroy');
 Route::post('/admin/destinataires', [AdminController::class, 'storeDestinataire'])
     ->name('admin.destinataires.store');
+Route::post('/admin/livreurs', [AdminController::class, 'storeLivreur'])
+    ->name('admin.livreurs.store');
+Route::put('/admin/livreurs/{livreur}', [AdminController::class, 'updateLivreur'])
+    ->name('admin.livreurs.update');
+Route::patch('/admin/livreurs/{livreur}/suspendre', [AdminController::class, 'suspendLivreur'])
+    ->name('admin.livreurs.suspend');
