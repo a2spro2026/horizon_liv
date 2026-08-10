@@ -1127,7 +1127,7 @@
 <body>
     @php
         $destinataireSections = ['fiche-destinataire', 'historique-livraison', 'balances-paiement'];
-        $livreurSections = ['fiche-livreur'];
+        $livreurSections = ['fiche-livreur', 'etat-livraison'];
         $compactSections = array_merge(
             ['fiche-partenaire', 'balance-partenaire'],
             $destinataireSections,
@@ -1149,6 +1149,7 @@
             'nvx-insc' => 'Nouvelles Inscriptions',
             'livreurs' => 'Livreurs',
             'fiche-livreur' => 'Fiche Livreur',
+            'etat-livraison' => 'Etat Livraison',
             'rapports' => 'Rapports',
             'configurations' => 'Configurations',
         ];
@@ -1341,6 +1342,14 @@
                                 Fiche Livreur
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.section', 'etat-livraison') }}" class="{{ $section === 'etat-livraison' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                </span>
+                                Etat Livraison
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li>
@@ -1401,7 +1410,7 @@
                 </div>
             @endif
 
-            <section class="panel {{ in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur'], true) ? 'is-flush' : '' }}">
+            <section class="panel {{ in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur', 'etat-livraison'], true) ? 'is-flush' : '' }}">
                 @if ($section === 'nvx-insc')
                     <h3>Nouvelle inscription</h3>
                     @if (($inscriptions ?? collect())->isEmpty())
@@ -1936,6 +1945,82 @@
                         </div>
                     @endif
 
+                @elseif ($section === 'etat-livraison')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Livreurs</small>
+                                Etat Livraison
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+                    @if (($etatLivraisons ?? collect())->isEmpty())
+                        <p class="empty-state">Aucun état de livraison pour le moment.</p>
+                    @else
+                        <div class="table-wrap">
+                            <table class="data-table" id="etat-livraison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Livreur</th>
+                                        <th>Ville</th>
+                                        <th>Nom Client</th>
+                                        <th>Montant Colis</th>
+                                        <th>Statue</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($etatLivraisons as $e)
+                                        <tr
+                                            data-date="{{ $e->created_at->format('d/m/Y') }}"
+                                            data-livreur="{{ $e->livreurLabel() }}"
+                                            data-ville="{{ $e->ville }}"
+                                            data-client="{{ $e->nom_client }}"
+                                            data-montant="{{ number_format((float) $e->montant_colis, 2, '.', ' ') }}"
+                                            data-statue="{{ \App\Models\EtatLivraison::statueLabel($e->statue) }}"
+                                            data-statue-key="{{ $e->statue }}"
+                                        >
+                                            <td>{{ $e->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $e->livreurLabel() }}</td>
+                                            <td>{{ $e->ville }}</td>
+                                            <td>{{ $e->nom_client }}</td>
+                                            <td>{{ number_format((float) $e->montant_colis, 2, '.', ' ') }}</td>
+                                            <td>
+                                                <span class="etat-badge {{ $e->statue }}">
+                                                    {{ \App\Models\EtatLivraison::statueLabel($e->statue) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button type="button" class="icon-btn" title="Voir" onclick="openEtatLivraisonModal(this.closest('tr'))" aria-label="Voir">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Imprimer" onclick="printEtatLivraisonRow(this.closest('tr'))" aria-label="Imprimer">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
                 @elseif ($section === 'balance-partenaire')
                     <h3>Balance Partenaire</h3>
                     @if (($partenaires ?? collect())->isEmpty())
@@ -2061,6 +2146,22 @@
                     <button type="submit" class="btn btn-add" id="livreur-modal-save">Valider</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="etat-livraison-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h3>Voir état livraison</h3>
+            <div class="field"><label>Date</label><input id="el_date" type="text" disabled></div>
+            <div class="field"><label>Livreur</label><input id="el_livreur" type="text" disabled></div>
+            <div class="field"><label>Ville</label><input id="el_ville" type="text" disabled></div>
+            <div class="field"><label>Nom Client</label><input id="el_client" type="text" disabled></div>
+            <div class="field"><label>Montant Colis</label><input id="el_montant" type="text" disabled></div>
+            <div class="field"><label>Statue</label><input id="el_statue" type="text" disabled></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-close" onclick="closeEtatLivraisonModal()">Fermer</button>
+                <button type="button" class="btn btn-add" onclick="printEtatLivraisonModal()">Imprimer</button>
+            </div>
         </div>
     </div>
 
@@ -2238,6 +2339,33 @@
 
         document.getElementById('livreur-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'livreur-modal') closeLivreurModal();
+        });
+
+        function openEtatLivraisonModal(row) {
+            document.getElementById('el_date').value = row.dataset.date;
+            document.getElementById('el_livreur').value = row.dataset.livreur;
+            document.getElementById('el_ville').value = row.dataset.ville;
+            document.getElementById('el_client').value = row.dataset.client;
+            document.getElementById('el_montant').value = row.dataset.montant;
+            document.getElementById('el_statue').value = row.dataset.statue;
+            document.getElementById('etat-livraison-modal').classList.add('open');
+        }
+
+        function closeEtatLivraisonModal() {
+            document.getElementById('etat-livraison-modal').classList.remove('open');
+        }
+
+        function printEtatLivraisonRow(row) {
+            openEtatLivraisonModal(row);
+            setTimeout(() => window.print(), 150);
+        }
+
+        function printEtatLivraisonModal() {
+            window.print();
+        }
+
+        document.getElementById('etat-livraison-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'etat-livraison-modal') closeEtatLivraisonModal();
         });
     </script>
 </body>

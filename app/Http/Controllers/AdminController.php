@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destinataire;
+use App\Models\EtatLivraison;
 use App\Models\Inscription;
 use App\Models\LivraisonHistorique;
 use App\Models\Livreur;
@@ -36,6 +37,7 @@ class AdminController extends Controller
             'nvx-insc',
             'livreurs',
             'fiche-livreur',
+            'etat-livraison',
             'rapports',
             'configurations',
             'admin',
@@ -264,6 +266,7 @@ class AdminController extends Controller
         $destinataires = collect();
         $livraisonHistoriques = collect();
         $livreurs = collect();
+        $etatLivraisons = collect();
 
         if ($section === 'nvx-insc') {
             $inscriptions = Inscription::query()
@@ -294,6 +297,13 @@ class AdminController extends Controller
             $livreurs = Livreur::query()->latest()->get();
         }
 
+        if ($section === 'etat-livraison') {
+            $etatLivraisons = EtatLivraison::query()
+                ->with('livreur')
+                ->latest()
+                ->get();
+        }
+
         return view('admin.dashboard', [
             'user' => session('auth_user'),
             'section' => $section,
@@ -303,6 +313,7 @@ class AdminController extends Controller
             'destinataires' => $destinataires,
             'livraisonHistoriques' => $livraisonHistoriques,
             'livreurs' => $livreurs,
+            'etatLivraisons' => $etatLivraisons,
         ]);
     }
 }
