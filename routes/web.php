@@ -17,7 +17,11 @@ Route::get('/admin/{section}', [AdminController::class, 'section'])->name('admin
 
 Route::patch('/admin/inscriptions/{inscription}/statut', [AdminController::class, 'updateInscriptionStatut'])
     ->name('admin.inscriptions.statut');
+Route::post('/admin/partenaires', [AdminController::class, 'storePartenaire'])
+    ->name('admin.partenaires.store');
 Route::put('/admin/partenaires/{partenaire}', [AdminController::class, 'updatePartenaire'])
     ->name('admin.partenaires.update');
+Route::patch('/admin/partenaires/{partenaire}/suspendre', [AdminController::class, 'suspendPartenaire'])
+    ->name('admin.partenaires.suspend');
 Route::delete('/admin/partenaires/{partenaire}', [AdminController::class, 'destroyPartenaire'])
     ->name('admin.partenaires.destroy');

@@ -817,6 +817,116 @@
             text-decoration: none;
         }
 
+        .btn-add {
+            background: linear-gradient(145deg, #ff8a4c, var(--orange));
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(242, 101, 34, 0.25);
+        }
+
+        .btn-add:hover { filter: brightness(1.05); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .status-badge.actif {
+            background: rgba(34, 197, 94, 0.18);
+            color: #16a34a;
+        }
+
+        html[data-theme="dark"] .status-badge.actif { color: #86efac; }
+
+        .status-badge.suspendu {
+            background: rgba(239, 68, 68, 0.18);
+            color: #dc2626;
+        }
+
+        html[data-theme="dark"] .status-badge.suspendu { color: #fca5a5; }
+
+        tr.is-suspended td {
+            opacity: 0.72;
+        }
+
+        .icon-btn.warn:hover {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        .add-panel {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 1.1rem 1.15rem;
+            border-radius: 14px;
+            border: 1px solid var(--orange-border);
+            background:
+                linear-gradient(135deg, var(--orange-soft), transparent 50%),
+                var(--surface);
+        }
+
+        .add-panel.open { display: block; }
+
+        .add-panel h4 {
+            font-family: "Outfit", sans-serif;
+            font-size: 1.05rem;
+            margin-bottom: 0.9rem;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .add-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.85rem;
+        }
+
+        .add-grid .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .add-grid label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .add-grid input,
+        .add-grid select {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: var(--chip-bg);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 0.7rem 0.85rem;
+            font: inherit;
+            text-align: center;
+        }
+
+        .add-grid select option {
+            color: #0b1628;
+            background: #fff;
+        }
+
+        .add-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 720px) {
+            .add-grid { grid-template-columns: 1fr; }
+        }
+
         .btn {
             border: none;
             border-radius: 10px;
@@ -1250,13 +1360,11 @@
                             </span>
                         </h3>
                         <div class="section-actions">
-                            <button type="button" class="btn btn-print" onclick="window.print()">
+                            <button type="button" class="btn btn-add" id="open-add-partenaire">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path d="M6 9V2h12v7"/>
-                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                                    <path d="M6 14h12v8H6z"/>
+                                    <path d="M12 5v14M5 12h14"/>
                                 </svg>
-                                Imprimer
+                                Ajouter
                             </button>
                             <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -1266,6 +1374,52 @@
                             </a>
                         </div>
                     </div>
+
+                    <div class="add-panel" id="add-partenaire-panel">
+                        <h4>Nouveau partenaire</h4>
+                        <form method="POST" action="{{ route('admin.partenaires.store') }}">
+                            @csrf
+                            <div class="add-grid">
+                                <div class="field">
+                                    <label for="add_nom">Nom Partenaire</label>
+                                    <input id="add_nom" type="text" name="nom_client" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_contact">Contact</label>
+                                    <input id="add_contact" type="text" name="telephone" placeholder="00212..." required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_ville">Ville</label>
+                                    <input id="add_ville" type="text" name="ville" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_type">Type Partenaire</label>
+                                    <select id="add_type" name="type_partenaire" required>
+                                        <option value="">Choisir</option>
+                                        <option value="Magasin">Magasin</option>
+                                        <option value="Agence">Agence</option>
+                                        <option value="Entreprise">Entreprise</option>
+                                        <option value="Particulier">Particulier</option>
+                                    </select>
+                                </div>
+                                <div class="field" style="grid-column: 1 / -1;">
+                                    <label for="add_paiement">Mode Paiement</label>
+                                    <select id="add_paiement" name="mode_paiement" required>
+                                        <option value="">Choisir</option>
+                                        <option value="Espèces">Espèces</option>
+                                        <option value="Virement">Virement</option>
+                                        <option value="Chèque">Chèque</option>
+                                        <option value="Carte">Carte</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="add-actions">
+                                <button type="submit" class="btn btn-add">Valider</button>
+                                <button type="button" class="btn btn-close" id="close-add-partenaire">Fermer</button>
+                            </div>
+                        </form>
+                    </div>
+
                     @if (($partenaires ?? collect())->isEmpty())
                         <p class="empty-state">Aucun partenaire pour le moment.</p>
                     @else
@@ -1275,44 +1429,33 @@
                                     <tr>
                                         <th>Date</th>
                                         <th>ID</th>
-                                        <th>Nom Client</th>
-                                        <th>CIN</th>
-                                        <th>Téléphone</th>
-                                        <th>E-mail</th>
+                                        <th>Nom Partenaire</th>
+                                        <th>Contact</th>
                                         <th>Ville</th>
-                                        <th>Magasin</th>
-                                        <th>Banque</th>
-                                        <th>Rib</th>
-                                        <th>Mot de Passe</th>
-                                        <th>Action</th>
+                                        <th>Type Partenaire</th>
+                                        <th>Mode Paiement</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($partenaires as $p)
                                         <tr
+                                            class="{{ ($p->statut ?? 'actif') === 'suspendu' ? 'is-suspended' : '' }}"
                                             data-id="{{ $p->id }}"
                                             data-nom="{{ $p->nom_client }}"
-                                            data-cin="{{ $p->cin }}"
-                                            data-tel="{{ $p->telephone }}"
-                                            data-email="{{ $p->email }}"
+                                            data-contact="{{ $p->telephone }}"
                                             data-ville="{{ $p->ville }}"
-                                            data-magasin="{{ $p->magasin }}"
-                                            data-banque="{{ $p->banque }}"
-                                            data-rib="{{ $p->rib }}"
-                                            data-password="{{ $p->password }}"
+                                            data-type="{{ $p->type_partenaire }}"
+                                            data-paiement="{{ $p->mode_paiement }}"
                                             data-date="{{ $p->created_at->format('d/m/Y') }}"
                                         >
                                             <td>{{ $p->created_at->format('d/m/Y') }}</td>
                                             <td>{{ $p->id }}</td>
                                             <td>{{ $p->nom_client }}</td>
-                                            <td>{{ $p->cin }}</td>
                                             <td>{{ $p->telephone }}</td>
-                                            <td>{{ $p->email }}</td>
                                             <td>{{ $p->ville }}</td>
-                                            <td>{{ $p->magasin }}</td>
-                                            <td>{{ $p->banque }}</td>
-                                            <td>{{ $p->rib }}</td>
-                                            <td>{{ $p->password }}</td>
+                                            <td>{{ $p->type_partenaire ?: '—' }}</td>
+                                            <td>{{ $p->mode_paiement ?: '—' }}</td>
                                             <td>
                                                 <div class="actions">
                                                     <button type="button" class="icon-btn" title="Voir" onclick="openPartenaireModal('view', this.closest('tr'))" aria-label="Voir">
@@ -1321,11 +1464,11 @@
                                                     <button type="button" class="icon-btn" title="Modifier" onclick="openPartenaireModal('edit', this.closest('tr'))" aria-label="Modifier">
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                                     </button>
-                                                    <form method="POST" action="{{ route('admin.partenaires.destroy', $p) }}" onsubmit="return confirm('Supprimer ce partenaire ?')">
+                                                    <form method="POST" action="{{ route('admin.partenaires.suspend', $p) }}">
                                                         @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="icon-btn danger" title="Supprimer" aria-label="Supprimer">
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                        @method('PATCH')
+                                                        <button type="submit" class="icon-btn warn" title="{{ ($p->statut ?? 'actif') === 'suspendu' ? 'Réactiver' : 'Suspendre' }}" aria-label="Suspendre">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 15V9M14 15V9"/></svg>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -1401,18 +1544,30 @@
                 @method('PUT')
                 <div class="field"><label>Date</label><input id="m_date" type="text" disabled></div>
                 <div class="field"><label>ID</label><input id="m_id" type="text" disabled></div>
-                <div class="field"><label>Nom Client</label><input id="m_nom" name="nom_client" type="text" required></div>
-                <div class="field"><label>CIN</label><input id="m_cin" name="cin" type="text" required></div>
-                <div class="field"><label>Téléphone</label><input id="m_tel" name="telephone" type="text" required></div>
-                <div class="field"><label>E-mail</label><input id="m_email" name="email" type="email" required></div>
+                <div class="field"><label>Nom Partenaire</label><input id="m_nom" name="nom_client" type="text" required></div>
+                <div class="field"><label>Contact</label><input id="m_contact" name="telephone" type="text" required></div>
                 <div class="field"><label>Ville</label><input id="m_ville" name="ville" type="text" required></div>
-                <div class="field"><label>Magasin</label><input id="m_magasin" name="magasin" type="text" required></div>
-                <div class="field"><label>Banque</label><input id="m_banque" name="banque" type="text" required></div>
-                <div class="field"><label>Rib</label><input id="m_rib" name="rib" type="text" required></div>
-                <div class="field"><label>Mot de Passe</label><input id="m_password" name="password" type="text" required minlength="10"></div>
+                <div class="field">
+                    <label>Type Partenaire</label>
+                    <select id="m_type" name="type_partenaire" required>
+                        <option value="Magasin">Magasin</option>
+                        <option value="Agence">Agence</option>
+                        <option value="Entreprise">Entreprise</option>
+                        <option value="Particulier">Particulier</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Mode Paiement</label>
+                    <select id="m_paiement" name="mode_paiement" required>
+                        <option value="Espèces">Espèces</option>
+                        <option value="Virement">Virement</option>
+                        <option value="Chèque">Chèque</option>
+                        <option value="Carte">Carte</option>
+                    </select>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-close" onclick="closePartenaireModal()">Fermer</button>
-                    <button type="submit" class="btn btn-print" id="modal-save">Enregistrer</button>
+                    <button type="submit" class="btn btn-add" id="modal-save">Valider</button>
                 </div>
             </form>
         </div>
@@ -1441,6 +1596,14 @@
             );
         });
 
+        const addPanel = document.getElementById('add-partenaire-panel');
+        document.getElementById('open-add-partenaire')?.addEventListener('click', () => {
+            addPanel?.classList.add('open');
+        });
+        document.getElementById('close-add-partenaire')?.addEventListener('click', () => {
+            addPanel?.classList.remove('open');
+        });
+
         document.querySelectorAll('.statut-select').forEach((select) => {
             const sync = () => {
                 select.classList.remove('en_attente', 'valide', 'refuse');
@@ -1459,17 +1622,13 @@
             document.getElementById('m_date').value = row.dataset.date;
             document.getElementById('m_id').value = id;
             document.getElementById('m_nom').value = row.dataset.nom;
-            document.getElementById('m_cin').value = row.dataset.cin;
-            document.getElementById('m_tel').value = row.dataset.tel;
-            document.getElementById('m_email').value = row.dataset.email;
+            document.getElementById('m_contact').value = row.dataset.contact;
             document.getElementById('m_ville').value = row.dataset.ville;
-            document.getElementById('m_magasin').value = row.dataset.magasin;
-            document.getElementById('m_banque').value = row.dataset.banque;
-            document.getElementById('m_rib').value = row.dataset.rib;
-            document.getElementById('m_password').value = row.dataset.password;
+            document.getElementById('m_type').value = row.dataset.type || 'Magasin';
+            document.getElementById('m_paiement').value = row.dataset.paiement || 'Virement';
 
             const editable = mode === 'edit';
-            ['m_nom','m_cin','m_tel','m_email','m_ville','m_magasin','m_banque','m_rib','m_password'].forEach((fid) => {
+            ['m_nom','m_contact','m_ville','m_type','m_paiement'].forEach((fid) => {
                 document.getElementById(fid).disabled = !editable;
             });
 

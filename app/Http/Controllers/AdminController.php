@@ -6,6 +6,7 @@ use App\Models\Inscription;
 use App\Models\Partenaire;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminController extends Controller
@@ -63,6 +64,9 @@ class AdminController extends Controller
                 'telephone' => $inscription->telephone,
                 'email' => $inscription->email,
                 'ville' => $inscription->ville,
+                'type_partenaire' => 'Magasin',
+                'mode_paiement' => 'Virement',
+                'statut' => 'actif',
                 'magasin' => $inscription->magasin,
                 'banque' => $inscription->banque,
                 'rib' => $inscription->rib,
@@ -82,6 +86,41 @@ class AdminController extends Controller
             ->with('admin_success', $message);
     }
 
+    public function storePartenaire(Request $request): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_client' => 'required|string|max:255',
+            'telephone' => 'required|string|max:30',
+            'ville' => 'required|string|max:255',
+            'type_partenaire' => 'required|string|max:100',
+            'mode_paiement' => 'required|string|max:100',
+        ]);
+
+        $email = strtolower(Str::slug($validated['nom_client'], '.')) . '@horizonpost.local';
+
+        Partenaire::create([
+            'nom_client' => $validated['nom_client'],
+            'telephone' => $validated['telephone'],
+            'ville' => $validated['ville'],
+            'type_partenaire' => $validated['type_partenaire'],
+            'mode_paiement' => $validated['mode_paiement'],
+            'statut' => 'actif',
+            'cin' => '',
+            'email' => $email,
+            'magasin' => $validated['nom_client'],
+            'banque' => '',
+            'rib' => '',
+            'login' => $email,
+            'password' => Str::password(12),
+        ]);
+
+        return redirect()->route('admin.section', 'fiche-partenaire');
+    }
+
     public function updatePartenaire(Request $request, Partenaire $partenaire): RedirectResponse
     {
         if (! session('auth_user')) {
@@ -90,21 +129,25 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'nom_client' => 'required|string|max:255',
-            'cin' => 'required|string|max:50',
             'telephone' => 'required|string|max:30',
-            'email' => 'required|email|max:255',
             'ville' => 'required|string|max:255',
-            'magasin' => 'required|string|max:255',
-            'banque' => 'required|string|max:255',
-            'rib' => 'required|string|max:64',
-            'password' => 'required|string|min:10|max:255',
-        ], [
-            'password.min' => 'Le mot de passe doit contenir au moins 10 chiffres, lettres ou signes.',
+            'type_partenaire' => 'required|string|max:100',
+            'mode_paiement' => 'required|string|max:100',
         ]);
 
+        $partenaire->update($validated);
+
+        return redirect()->route('admin.section', 'fiche-partenaire');
+    }
+
+    public function suspendPartenaire(Partenaire $partenaire): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
         $partenaire->update([
-            ...$validated,
-            'login' => $validated['email'],
+            'statut' => $partenaire->statut === 'suspendu' ? 'actif' : 'suspendu',
         ]);
 
         return redirect()->route('admin.section', 'fiche-partenaire');

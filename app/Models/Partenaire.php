@@ -14,6 +14,9 @@ class Partenaire extends Model
         'telephone',
         'email',
         'ville',
+        'type_partenaire',
+        'mode_paiement',
+        'statut',
         'magasin',
         'banque',
         'rib',
@@ -24,5 +27,10 @@ class Partenaire extends Model
     public function inscription(): BelongsTo
     {
         return $this->belongsTo(Inscription::class);
+    }
+
+    public function isSuspendu(): bool
+    {
+        return $this->statut === 'suspendu';
     }
 }
