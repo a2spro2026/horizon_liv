@@ -23,8 +23,8 @@
             --surface: #122033;
             --surface-2: #182a42;
             --surface-3: #1e334f;
-            --nav-bg-1: rgba(20, 34, 56, 0.98);
-            --nav-bg-2: rgba(11, 20, 36, 0.96);
+            --nav-bg-1: rgba(20, 34, 56, 0.92);
+            --nav-bg-2: rgba(11, 20, 36, 0.88);
             --sidebar-bg-1: #14233a;
             --sidebar-bg-2: #101c2e;
             --sidebar-bg-3: #0d1726;
@@ -32,17 +32,20 @@
             --ico-bg-2: #1a2c44;
             --hover-bg: rgba(255, 255, 255, 0.05);
             --chip-bg: rgba(255, 255, 255, 0.04);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            --shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.18);
             --modal-backdrop: rgba(0, 0, 0, 0.55);
             --badge-ring: rgba(13, 23, 40, 0.65);
-            --content-glow: rgba(242, 101, 34, 0.08);
+            --content-glow: rgba(242, 101, 34, 0.1);
             --success-bg: rgba(34, 197, 94, 0.15);
             --success-border: rgba(34, 197, 94, 0.4);
             --success-text: #bbf7d0;
-            --sidebar-w: 270px;
+            --sidebar-w: 278px;
             --green: #22c55e;
             --yellow: #eab308;
             --red: #ef4444;
+            --glass: rgba(255, 255, 255, 0.03);
+            --ring: 0 0 0 1px rgba(255, 255, 255, 0.06);
         }
 
         html[data-theme="light"] {
@@ -55,27 +58,30 @@
             --text: #0b1628;
             --muted: #5b6d86;
             --line: rgba(11, 22, 40, 0.1);
-            --bg: #eef2f7;
-            --bg-soft: #f7f9fc;
+            --bg: #e8eef6;
+            --bg-soft: #f4f7fb;
             --surface: #ffffff;
             --surface-2: #ffffff;
             --surface-3: #1a2d45;
-            --nav-bg-1: #ffffff;
-            --nav-bg-2: #f8fafc;
+            --nav-bg-1: rgba(255, 255, 255, 0.92);
+            --nav-bg-2: rgba(248, 250, 252, 0.9);
             --sidebar-bg-1: #ffffff;
             --sidebar-bg-2: #f7f9fc;
             --sidebar-bg-3: #eef2f7;
             --ico-bg-1: #fff1e8;
             --ico-bg-2: #ffe3d4;
             --hover-bg: rgba(11, 22, 40, 0.04);
-            --chip-bg: rgba(11, 22, 40, 0.04);
-            --shadow: 0 10px 28px rgba(11, 22, 40, 0.08);
+            --chip-bg: rgba(11, 22, 40, 0.035);
+            --shadow: 0 14px 36px rgba(11, 22, 40, 0.1);
+            --shadow-soft: 0 6px 18px rgba(11, 22, 40, 0.06);
             --modal-backdrop: rgba(11, 22, 40, 0.35);
             --badge-ring: #ffffff;
-            --content-glow: rgba(232, 93, 28, 0.08);
+            --content-glow: rgba(232, 93, 28, 0.1);
             --success-bg: rgba(34, 197, 94, 0.12);
             --success-border: rgba(34, 197, 94, 0.35);
             --success-text: #166534;
+            --glass: rgba(255, 255, 255, 0.65);
+            --ring: 0 0 0 1px rgba(11, 22, 40, 0.05);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -106,11 +112,13 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            padding: 0.75rem 1.15rem;
-            background: linear-gradient(180deg, var(--nav-bg-1), var(--nav-bg-2));
+            padding: 0.7rem 1.2rem;
+            background:
+                linear-gradient(120deg, rgba(242, 101, 34, 0.12), transparent 28%),
+                linear-gradient(180deg, var(--nav-bg-1), var(--nav-bg-2));
             border-bottom: 1px solid var(--orange-border);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(18px) saturate(1.2);
         }
 
         .brand {
@@ -119,79 +127,116 @@
             gap: 0.7rem;
             font-family: "Outfit", sans-serif;
             font-weight: 700;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
             white-space: nowrap;
             color: var(--text);
         }
 
         .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: linear-gradient(145deg, #ff7a3a, var(--orange) 45%, #d94c12);
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            background: linear-gradient(145deg, #ff8a4c, var(--orange) 48%, #c94410);
             display: grid;
             place-items: center;
-            font-size: 1rem;
+            font-size: 1.05rem;
             color: #fff;
             font-weight: 800;
-            box-shadow: 0 8px 18px rgba(242, 101, 34, 0.35);
+            box-shadow:
+                0 10px 22px rgba(242, 101, 34, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            position: relative;
+        }
+
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            inset: -3px;
+            border-radius: 15px;
+            border: 1px solid var(--orange-border);
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 0.45rem;
+            gap: 0.35rem;
             flex-wrap: wrap;
-            padding: 0.2rem;
-            border-radius: 16px;
-            background: var(--chip-bg);
+            padding: 0.28rem;
+            border-radius: 18px;
+            background:
+                linear-gradient(180deg, var(--glass), transparent),
+                var(--chip-bg);
             border: 1px solid var(--line);
+            box-shadow: var(--ring), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .nav-links a {
             display: inline-flex;
             align-items: center;
             gap: 0.55rem;
-            padding: 0.45rem 0.8rem 0.45rem 0.45rem;
-            border-radius: 12px;
-            font-size: 0.88rem;
+            padding: 0.4rem 0.85rem 0.4rem 0.4rem;
+            border-radius: 13px;
+            font-size: 0.86rem;
             font-weight: 600;
             color: var(--muted);
             border: 1px solid transparent;
-            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+            position: relative;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .nav-links a:hover {
             background: var(--hover-bg);
             color: var(--text);
             transform: translateY(-1px);
+            border-color: var(--line);
         }
 
         .nav-links a.active {
-            background: linear-gradient(180deg, var(--orange-soft), transparent);
+            background: linear-gradient(165deg, rgba(242, 101, 34, 0.22), rgba(242, 101, 34, 0.06));
             color: var(--text);
             border-color: var(--orange-border);
-            box-shadow: 0 6px 16px rgba(242, 101, 34, 0.12);
+            box-shadow:
+                0 8px 18px rgba(242, 101, 34, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-links a.active::after {
+            content: "";
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            bottom: 3px;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, var(--orange), transparent);
+            opacity: 0.85;
         }
 
         .nav-ico {
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
             display: inline-grid;
             place-items: center;
             flex-shrink: 0;
             background: linear-gradient(145deg, var(--ico-bg-1), var(--ico-bg-2));
             border: 1px solid var(--line);
             color: var(--accent-text);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-links a:hover .nav-ico {
+            transform: scale(1.04);
         }
 
         .nav-links a.active .nav-ico {
-            background: linear-gradient(145deg, #ff8a4c, var(--orange));
+            background: linear-gradient(145deg, #ff9a63, var(--orange));
             color: #fff;
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 10px rgba(242, 101, 34, 0.35);
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 6px 14px rgba(242, 101, 34, 0.4);
         }
 
         .nav-links a .badge {
@@ -278,12 +323,15 @@
         }
 
         .sidebar {
-            background: linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 55%, var(--sidebar-bg-3) 100%);
+            background:
+                radial-gradient(circle at top left, rgba(242, 101, 34, 0.14), transparent 42%),
+                linear-gradient(180deg, var(--sidebar-bg-1) 0%, var(--sidebar-bg-2) 55%, var(--sidebar-bg-3) 100%);
             border-right: 1px solid var(--orange-border);
-            padding: 1.15rem 0.8rem;
+            padding: 1.15rem 0.85rem;
             display: flex;
             flex-direction: column;
             min-height: calc(100vh - 64px);
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
         }
 
         .sidebar-top {
@@ -293,12 +341,13 @@
 
         .sidebar h2 {
             font-family: "Outfit", sans-serif;
-            font-size: 0.72rem;
-            letter-spacing: 0.1em;
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--muted);
-            padding: 0 0.75rem;
-            margin-bottom: 0.85rem;
+            padding: 0 0.85rem;
+            margin-bottom: 0.95rem;
+            opacity: 0.9;
         }
 
         .profile-card {
@@ -306,14 +355,21 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem;
-            border-radius: 14px;
-            background: var(--chip-bg);
+            border-radius: 16px;
+            background:
+                linear-gradient(145deg, rgba(242, 101, 34, 0.1), transparent 60%),
+                var(--chip-bg);
             border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
         }
 
         .profile-card--nav {
-            padding: 0.35rem 0.7rem 0.35rem 0.35rem;
+            padding: 0.32rem 0.75rem 0.32rem 0.32rem;
             gap: 0.6rem;
+            border-radius: 999px;
+            background:
+                linear-gradient(145deg, rgba(242, 101, 34, 0.12), transparent 55%),
+                var(--chip-bg);
         }
 
         .profile-card--nav .profile-photo {
@@ -351,11 +407,11 @@
         }
 
         .profile-role {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--accent-text);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.06em;
         }
 
         .sidebar-footer {
@@ -368,7 +424,7 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0.4rem;
         }
 
         .side-links > li > a,
@@ -376,34 +432,38 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.72rem 0.75rem;
+            padding: 0.7rem 0.8rem;
             border-radius: 14px;
             color: var(--muted);
             font-weight: 600;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             border: 1px solid transparent;
-            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+            background: transparent;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .side-links > li > a:hover,
         .side-group > .side-parent:hover {
-            background: var(--hover-bg);
+            background: linear-gradient(90deg, var(--hover-bg), transparent);
             color: var(--text);
-            transform: translateX(2px);
+            transform: translateX(3px);
+            border-color: var(--line);
         }
 
         .side-links > li > a.active,
         .side-group.has-active > .side-parent {
-            background: linear-gradient(90deg, var(--orange-soft), transparent);
+            background: linear-gradient(100deg, rgba(242, 101, 34, 0.2), rgba(242, 101, 34, 0.04) 70%, transparent);
             color: var(--text);
             border-color: var(--orange-border);
-            box-shadow: inset 3px 0 0 var(--orange);
+            box-shadow:
+                inset 3px 0 0 var(--orange),
+                0 8px 18px rgba(242, 101, 34, 0.1);
         }
 
         .side-ico {
-            width: 34px;
-            height: 34px;
-            border-radius: 11px;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
             display: inline-grid;
             place-items: center;
             flex-shrink: 0;
@@ -411,16 +471,22 @@
             border: 1px solid var(--line);
             color: var(--accent-text);
             box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.14),
                 0 6px 14px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .side-links > li > a:hover .side-ico,
+        .side-group > .side-parent:hover .side-ico {
+            transform: scale(1.05);
         }
 
         .side-links > li > a.active .side-ico,
         .side-group.has-active > .side-parent .side-ico {
-            background: linear-gradient(145deg, #ff8a4c, var(--orange));
+            background: linear-gradient(145deg, #ff9a63, var(--orange));
             color: #fff;
-            border-color: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 6px 14px rgba(242, 101, 34, 0.35);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 16px rgba(242, 101, 34, 0.38);
         }
 
         .side-group > .side-parent {
@@ -434,8 +500,9 @@
         }
 
         .side-group.open > .side-parent {
-            background: var(--hover-bg);
+            background: linear-gradient(90deg, var(--hover-bg), transparent);
             color: var(--text);
+            border-color: var(--line);
         }
 
         .side-parent-left {
@@ -450,50 +517,62 @@
             border-right: 2px solid currentColor;
             border-bottom: 2px solid currentColor;
             transform: rotate(-45deg);
-            transition: transform 0.2s ease;
-            opacity: 0.8;
-            margin-right: 0.2rem;
+            transition: transform 0.22s ease;
+            opacity: 0.75;
+            margin-right: 0.25rem;
         }
 
         .side-group.open .side-caret {
             transform: rotate(45deg);
+            color: var(--orange);
+            opacity: 1;
         }
 
         .sub-links {
             list-style: none;
             display: none;
             flex-direction: column;
-            gap: 0.25rem;
-            padding: 0.25rem 0 0.4rem 0.55rem;
-            margin-left: 1.05rem;
-            border-left: 1px dashed var(--orange-border);
+            gap: 0.28rem;
+            padding: 0.35rem 0 0.45rem 0.45rem;
+            margin: 0.15rem 0 0.2rem 1.15rem;
+            border-left: 2px solid transparent;
+            border-image: linear-gradient(180deg, var(--orange), transparent) 1;
         }
 
         .side-group.open .sub-links {
             display: flex;
+            animation: sideSubIn 0.22s ease;
+        }
+
+        @keyframes sideSubIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .sub-links a {
             display: flex;
             align-items: center;
             gap: 0.65rem;
-            padding: 0.62rem 0.75rem;
+            padding: 0.58rem 0.75rem;
             border-radius: 12px;
             color: var(--muted);
             font-weight: 600;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             border: 1px solid transparent;
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
         }
 
         .sub-links a:hover {
             background: var(--hover-bg);
             color: var(--text);
+            transform: translateX(2px);
         }
 
         .sub-links a.active {
-            background: linear-gradient(90deg, var(--orange-soft), transparent);
+            background: linear-gradient(90deg, rgba(242, 101, 34, 0.18), transparent);
             color: var(--text);
             border-color: var(--orange-border);
+            box-shadow: inset 2px 0 0 var(--orange);
         }
 
         .sub-ico {
@@ -508,8 +587,9 @@
         }
 
         .sub-links a.active .sub-ico {
-            background: linear-gradient(145deg, #ff8a4c, var(--orange));
+            background: linear-gradient(145deg, #ff9a63, var(--orange));
             color: #fff;
+            border-color: transparent;
         }
 
         .content {
@@ -558,38 +638,165 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 1rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.35rem;
         }
 
         .card {
-            background: var(--surface-2);
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(160deg, rgba(255, 255, 255, 0.04), transparent 45%),
+                var(--surface-2);
             border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 1.1rem 1.15rem;
-            text-align: center;
+            border-radius: 18px;
+            padding: 1.2rem 1.2rem 1.15rem;
+            text-align: left;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ff9a63, var(--orange));
+            border-radius: 18px 0 0 18px;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(242, 101, 34, 0.18), transparent 68%);
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--orange-border);
             box-shadow: var(--shadow);
+        }
+
+        .card .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card .card-ico {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: inline-grid;
+            place-items: center;
+            background: linear-gradient(145deg, rgba(242, 101, 34, 0.22), rgba(242, 101, 34, 0.08));
+            border: 1px solid var(--orange-border);
+            color: var(--accent-text);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        .card .card-chip {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-text);
+            padding: 0.28rem 0.55rem;
+            border-radius: 999px;
+            background: var(--orange-soft);
+            border: 1px solid var(--orange-border);
         }
 
         .card .label {
             color: var(--muted);
-            font-size: 0.85rem;
-            margin-bottom: 0.45rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            position: relative;
+            z-index: 1;
         }
 
         .card .value {
             font-family: "Outfit", sans-serif;
-            font-size: 1.55rem;
+            font-size: 1.85rem;
             font-weight: 700;
+            letter-spacing: -0.02em;
             color: var(--text);
+            position: relative;
+            z-index: 1;
+            line-height: 1.1;
         }
 
+        .card.card--partners::before { background: linear-gradient(180deg, #60a5fa, #2563eb); }
+        .card.card--partners .card-ico {
+            color: #93c5fd;
+            background: linear-gradient(145deg, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0.08));
+            border-color: rgba(37, 99, 235, 0.35);
+        }
+        .card.card--partners .card-chip {
+            color: #93c5fd;
+            background: rgba(37, 99, 235, 0.14);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+        .card.card--partners::after {
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.18), transparent 68%);
+        }
+
+        .card.card--insc::before { background: linear-gradient(180deg, #4ade80, #16a34a); }
+        .card.card--insc .card-ico {
+            color: #86efac;
+            background: linear-gradient(145deg, rgba(22, 163, 74, 0.22), rgba(22, 163, 74, 0.08));
+            border-color: rgba(22, 163, 74, 0.35);
+        }
+        .card.card--insc .card-chip {
+            color: #86efac;
+            background: rgba(22, 163, 74, 0.14);
+            border-color: rgba(22, 163, 74, 0.3);
+        }
+        .card.card--insc::after {
+            background: radial-gradient(circle, rgba(22, 163, 74, 0.18), transparent 68%);
+        }
+
+        .card.card--pay::before { background: linear-gradient(180deg, #fbbf24, #d97706); }
+        .card.card--pay .card-ico {
+            color: #fcd34d;
+            background: linear-gradient(145deg, rgba(217, 119, 6, 0.22), rgba(217, 119, 6, 0.08));
+            border-color: rgba(217, 119, 6, 0.35);
+        }
+        .card.card--pay .card-chip {
+            color: #fcd34d;
+            background: rgba(217, 119, 6, 0.14);
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+        .card.card--pay::after {
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.18), transparent 68%);
+        }
+
+        html[data-theme="light"] .card.card--partners .card-chip,
+        html[data-theme="light"] .card.card--partners .card-ico { color: #1d4ed8; }
+        html[data-theme="light"] .card.card--insc .card-chip,
+        html[data-theme="light"] .card.card--insc .card-ico { color: #15803d; }
+        html[data-theme="light"] .card.card--pay .card-chip,
+        html[data-theme="light"] .card.card--pay .card-ico { color: #b45309; }
+
         .panel {
-            background: var(--surface-2);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 28%),
+                var(--surface-2);
             border: 1px solid var(--line);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 1.25rem;
             min-height: 280px;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-soft);
         }
 
         .panel h3 {
@@ -755,36 +962,40 @@
             gap: 1rem;
             flex-wrap: wrap;
             margin-bottom: 1rem;
-            padding: 0.85rem 1rem;
-            border-radius: 14px;
+            padding: 0.9rem 1.05rem;
+            border-radius: 16px;
             background:
-                linear-gradient(135deg, var(--orange-soft), transparent 55%),
+                linear-gradient(120deg, rgba(242, 101, 34, 0.16), transparent 42%),
+                linear-gradient(180deg, var(--glass), transparent),
                 var(--chip-bg);
             border: 1px solid var(--orange-border);
+            box-shadow: var(--ring), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .section-title {
             display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.8rem;
             margin: 0;
             text-align: left;
             font-family: "Outfit", sans-serif;
-            font-size: 1.15rem;
+            font-size: 1.18rem;
             font-weight: 700;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.015em;
             color: var(--text);
         }
 
         .section-title-ico {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             display: inline-grid;
             place-items: center;
-            background: linear-gradient(145deg, #ff8a4c, var(--orange));
+            background: linear-gradient(145deg, #ff9a63, var(--orange));
             color: #fff;
-            box-shadow: 0 8px 18px rgba(242, 101, 34, 0.3);
+            box-shadow:
+                0 10px 20px rgba(242, 101, 34, 0.32),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
             flex-shrink: 0;
         }
 
@@ -1508,10 +1719,46 @@
 
             @if ($section === 'dashboard')
                 <div class="cards">
-                    <div class="card"><div class="label">Commandes du jour</div><div class="value">128</div></div>
-                    <div class="card"><div class="label">Partenaires actifs</div><div class="value">{{ ($partenaires ?? null) ? $partenaires->count() : \App\Models\Partenaire::count() }}</div></div>
-                    <div class="card"><div class="label">Nvx inscriptions</div><div class="value">{{ $nvxCount }}</div></div>
-                    <div class="card"><div class="label">Paiements en attente</div><div class="value">12</div></div>
+                    <article class="card card--orders">
+                        <div class="card-top">
+                            <span class="card-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9 5-9-5 9-5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+                            </span>
+                            <span class="card-chip">Jour</span>
+                        </div>
+                        <div class="label">Commandes du jour</div>
+                        <div class="value">128</div>
+                    </article>
+                    <article class="card card--partners">
+                        <div class="card-top">
+                            <span class="card-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </span>
+                            <span class="card-chip">Actifs</span>
+                        </div>
+                        <div class="label">Partenaires actifs</div>
+                        <div class="value">{{ ($partenaires ?? null) ? $partenaires->count() : \App\Models\Partenaire::count() }}</div>
+                    </article>
+                    <article class="card card--insc">
+                        <div class="card-top">
+                            <span class="card-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+                            </span>
+                            <span class="card-chip">Nvx</span>
+                        </div>
+                        <div class="label">Nvx inscriptions</div>
+                        <div class="value">{{ $nvxCount }}</div>
+                    </article>
+                    <article class="card card--pay">
+                        <div class="card-top">
+                            <span class="card-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                            </span>
+                            <span class="card-chip">Attente</span>
+                        </div>
+                        <div class="label">Paiements en attente</div>
+                        <div class="value">12</div>
+                    </article>
                 </div>
             @endif
 
