@@ -350,7 +350,7 @@ class AdminController extends Controller
             $livreurs = Livreur::query()->latest()->get();
         }
 
-        if ($section === 'carte-livreurs') {
+        if (in_array($section, ['dashboard', 'carte-livreurs'], true)) {
             $livreurs = Livreur::query()
                 ->where('statut', 'actif')
                 ->whereNotNull('latitude')
