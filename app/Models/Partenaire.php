@@ -16,6 +16,7 @@ class Partenaire extends Model
         'ville',
         'statue',
         'activite',
+        'solde',
         'type_partenaire',
         'mode_paiement',
         'statut',

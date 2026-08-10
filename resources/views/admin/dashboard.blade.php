@@ -1436,6 +1436,7 @@
                                         <th>Statue</th>
                                         <th>Ville</th>
                                         <th>Activité</th>
+                                        <th>Solde</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1458,6 +1459,7 @@
                                             <td>{{ $p->statue ?: '—' }}</td>
                                             <td>{{ $p->ville }}</td>
                                             <td>{{ $p->activite ?: '—' }}</td>
+                                            <td>{{ number_format((float) ($p->solde ?? 0), 2, '.', ' ') }}</td>
                                             <td>
                                                 <div class="actions">
                                                     <button type="button" class="icon-btn" title="Voir" onclick="openPartenaireModal('view', this.closest('tr'))" aria-label="Voir">
