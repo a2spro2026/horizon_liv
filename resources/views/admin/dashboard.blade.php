@@ -1192,10 +1192,12 @@
     @php
         $destinataireSections = ['fiche-destinataire', 'historique-livraison', 'balances-paiement'];
         $livreurSections = ['fiche-livreur', 'etat-livraison', 'carte-livreurs'];
+        $configSections = ['utilisateur', 'configurations'];
         $compactSections = array_merge(
             ['fiche-partenaire', 'balance-partenaire'],
             $destinataireSections,
-            $livreurSections
+            $livreurSections,
+            $configSections
         );
         $titles = [
             'dashboard' => 'Tableau de Bord',
@@ -1217,6 +1219,7 @@
             'carte-livreurs' => 'Carte Livreurs',
             'rapports' => 'Rapports',
             'configurations' => 'Configurations',
+            'utilisateur' => 'Utilisateur',
         ];
         $title = $titles[$section] ?? 'Administration';
     @endphp
@@ -1258,7 +1261,7 @@
                 </span>
                 Rapports
             </a>
-            <a href="{{ route('admin.section', 'configurations') }}" class="{{ $section === 'configurations' ? 'active' : '' }}">
+            <a href="{{ route('admin.section', 'utilisateur') }}" class="{{ in_array($section, $configSections, true) ? 'active' : '' }}">
                 <span class="nav-ico" aria-hidden="true">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
                 </span>
@@ -1441,7 +1444,28 @@
                         Etat Paiement
                     </a>
                 </li>
-                    <li>
+                <li class="side-group {{ in_array($section, $configSections, true) ? 'open has-active' : '' }}" id="configurations-group">
+                    <button type="button" class="side-parent" id="configurations-toggle" aria-expanded="{{ in_array($section, $configSections, true) ? 'true' : 'false' }}">
+                        <span class="side-parent-left">
+                            <span class="side-ico" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+                            </span>
+                            Configurations
+                        </span>
+                        <span class="side-caret" aria-hidden="true"></span>
+                    </button>
+                    <ul class="sub-links">
+                        <li>
+                            <a href="{{ route('admin.section', 'utilisateur') }}" class="{{ $section === 'utilisateur' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </span>
+                                Utilisateur
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
                     <a href="{{ route('admin.section', 'parametres') }}" class="{{ $section === 'parametres' ? 'active' : '' }}">
                         <span class="side-ico" aria-hidden="true">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -1470,7 +1494,7 @@
         <main class="content {{ in_array($section, $compactSections, true) ? 'is-compact' : '' }}">
             <h1 class="page-title {{ in_array($section, $compactSections, true) ? 'is-hidden' : '' }}">{{ $title }}</h1>
 
-            @if (session('admin_success') && ! in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'fiche-livreur'], true))
+            @if (session('admin_success') && ! in_array($section, ['fiche-partenaire', 'fiche-destinataire', 'fiche-livreur', 'utilisateur'], true))
                 <div class="alert-ok">{{ session('admin_success') }}</div>
             @endif
 
@@ -1483,7 +1507,7 @@
                 </div>
             @endif
 
-            <section class="panel {{ in_array($section, ['dashboard', 'fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur', 'etat-livraison', 'carte-livreurs'], true) ? 'is-flush' : '' }}">
+            <section class="panel {{ in_array($section, ['dashboard', 'fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur', 'etat-livraison', 'carte-livreurs', 'utilisateur'], true) ? 'is-flush' : '' }}">
                 @if ($section === 'dashboard')
                     @include('admin.partials.livreurs-map', [
                         'mapPoints' => $mapPoints ?? [],
@@ -2119,6 +2143,141 @@
                         'mapTitle' => 'Carte Livreurs',
                     ])
 
+                @elseif ($section === 'utilisateur')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Configurations</small>
+                                Utilisateur
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-add" id="open-add-utilisateur">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="add-panel" id="add-utilisateur-panel">
+                        <h4>Nouvel utilisateur</h4>
+                        <form method="POST" action="{{ route('admin.utilisateurs.store') }}">
+                            @csrf
+                            <div class="add-grid">
+                                <div class="field">
+                                    <label for="add_u_nom">Nom Complet</label>
+                                    <input id="add_u_nom" type="text" name="nom_complet" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_u_contact">Contact</label>
+                                    <input id="add_u_contact" type="text" name="contact" placeholder="00212..." required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_u_email">E-mail</label>
+                                    <input id="add_u_email" type="email" name="email" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_u_statue">Statue</label>
+                                    <select id="add_u_statue" name="statue" required>
+                                        <option value="">Choisir</option>
+                                        <option value="admin">Administrateur</option>
+                                        <option value="client">Client</option>
+                                        <option value="livreur">Livreur</option>
+                                        <option value="agence">Agence</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="add_u_login">Login</label>
+                                    <input id="add_u_login" type="text" name="login" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_u_password">Mot de Passe</label>
+                                    <input id="add_u_password" type="text" name="password" required>
+                                </div>
+                            </div>
+                            <div class="add-actions">
+                                <button type="submit" class="btn btn-add">Valider</button>
+                                <button type="button" class="btn btn-close" id="close-add-utilisateur">Fermer</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if (($utilisateurs ?? collect())->isEmpty())
+                        <div id="utilisateurs-list">
+                            <p class="empty-state">Aucun utilisateur pour le moment.</p>
+                        </div>
+                    @else
+                        <div class="table-wrap" id="utilisateurs-list">
+                            <table class="data-table" id="utilisateurs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Nom Complet</th>
+                                        <th>Contact</th>
+                                        <th>E-mail</th>
+                                        <th>Statue</th>
+                                        <th>Login</th>
+                                        <th>Mot de Passe</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($utilisateurs as $u)
+                                        <tr
+                                            class="{{ ($u->statut ?? 'actif') === 'suspendu' ? 'is-suspended' : '' }}"
+                                            data-id="{{ $u->id }}"
+                                            data-nom="{{ $u->nom_complet }}"
+                                            data-contact="{{ $u->contact }}"
+                                            data-email="{{ $u->email }}"
+                                            data-statue="{{ $u->statue }}"
+                                            data-login="{{ $u->login }}"
+                                            data-password="{{ $u->password }}"
+                                            data-date="{{ $u->created_at->format('d/m/Y') }}"
+                                        >
+                                            <td>{{ $u->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $u->nom_complet }}</td>
+                                            <td>{{ $u->contact }}</td>
+                                            <td>{{ $u->email }}</td>
+                                            <td>{{ $u->statueLabel() }}</td>
+                                            <td>{{ $u->login }}</td>
+                                            <td>{{ $u->password }}</td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button type="button" class="icon-btn" title="Voir" onclick="openUtilisateurModal('view', this.closest('tr'))" aria-label="Voir">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Modifier" onclick="openUtilisateurModal('edit', this.closest('tr'))" aria-label="Modifier">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                    </button>
+                                                    <form method="POST" action="{{ route('admin.utilisateurs.suspend', $u) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="icon-btn warn" title="{{ ($u->statut ?? 'actif') === 'suspendu' ? 'Réactiver' : 'Suspendre' }}" aria-label="Suspendre">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 15V9M14 15V9"/></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
                 @elseif ($section === 'balance-partenaire')
                     <h3>Balance Partenaire</h3>
                     @if (($partenaires ?? collect())->isEmpty())
@@ -2248,6 +2407,35 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="utilisateur-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h3 id="utilisateur-modal-title">Utilisateur</h3>
+            <form method="POST" id="utilisateur-form">
+                @csrf
+                @method('PUT')
+                <div class="field"><label>Date</label><input id="u_date" type="text" disabled></div>
+                <div class="field"><label>Nom Complet</label><input id="u_nom" name="nom_complet" type="text" required></div>
+                <div class="field"><label>Contact</label><input id="u_contact" name="contact" type="text" required></div>
+                <div class="field"><label>E-mail</label><input id="u_email" name="email" type="email" required></div>
+                <div class="field">
+                    <label>Statue</label>
+                    <select id="u_statue" name="statue" required>
+                        <option value="admin">Administrateur</option>
+                        <option value="client">Client</option>
+                        <option value="livreur">Livreur</option>
+                        <option value="agence">Agence</option>
+                    </select>
+                </div>
+                <div class="field"><label>Login</label><input id="u_login" name="login" type="text" required></div>
+                <div class="field"><label>Mot de Passe</label><input id="u_password" name="password" type="text" required></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-close" onclick="closeUtilisateurModal()">Fermer</button>
+                    <button type="submit" class="btn btn-add" id="utilisateur-modal-save">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="modal-backdrop" id="etat-livraison-modal" role="dialog" aria-modal="true">
         <div class="modal">
             <h3>Voir état livraison</h3>
@@ -2307,6 +2495,16 @@
             );
         });
 
+        const configurationsToggle = document.getElementById('configurations-toggle');
+        const configurationsGroup = document.getElementById('configurations-group');
+        configurationsToggle?.addEventListener('click', () => {
+            configurationsGroup.classList.toggle('open');
+            configurationsToggle.setAttribute(
+                'aria-expanded',
+                configurationsGroup.classList.contains('open') ? 'true' : 'false'
+            );
+        });
+
         const addPanel = document.getElementById('add-partenaire-panel');
         const partenairesList = document.getElementById('partenaires-list');
         document.getElementById('open-add-partenaire')?.addEventListener('click', () => {
@@ -2338,6 +2536,17 @@
         document.getElementById('close-add-livreur')?.addEventListener('click', () => {
             addLivreurPanel?.classList.remove('open');
             if (livreursList) livreursList.style.display = '';
+        });
+
+        const addUtilisateurPanel = document.getElementById('add-utilisateur-panel');
+        const utilisateursList = document.getElementById('utilisateurs-list');
+        document.getElementById('open-add-utilisateur')?.addEventListener('click', () => {
+            addUtilisateurPanel?.classList.add('open');
+            if (utilisateursList) utilisateursList.style.display = 'none';
+        });
+        document.getElementById('close-add-utilisateur')?.addEventListener('click', () => {
+            addUtilisateurPanel?.classList.remove('open');
+            if (utilisateursList) utilisateursList.style.display = '';
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
@@ -2439,6 +2648,38 @@
 
         document.getElementById('livreur-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'livreur-modal') closeLivreurModal();
+        });
+
+        function openUtilisateurModal(mode, row) {
+            const modal = document.getElementById('utilisateur-modal');
+            const form = document.getElementById('utilisateur-form');
+            const id = row.dataset.id;
+            form.action = `/admin/utilisateurs/${id}`;
+
+            document.getElementById('u_date').value = row.dataset.date;
+            document.getElementById('u_nom').value = row.dataset.nom;
+            document.getElementById('u_contact').value = row.dataset.contact;
+            document.getElementById('u_email').value = row.dataset.email;
+            document.getElementById('u_statue').value = row.dataset.statue || 'admin';
+            document.getElementById('u_login').value = row.dataset.login;
+            document.getElementById('u_password').value = row.dataset.password;
+
+            const editable = mode === 'edit';
+            ['u_nom','u_contact','u_email','u_statue','u_login','u_password'].forEach((fid) => {
+                document.getElementById(fid).disabled = !editable;
+            });
+
+            document.getElementById('utilisateur-modal-title').textContent = editable ? 'Modifier utilisateur' : 'Voir utilisateur';
+            document.getElementById('utilisateur-modal-save').style.display = editable ? 'inline-block' : 'none';
+            modal.classList.add('open');
+        }
+
+        function closeUtilisateurModal() {
+            document.getElementById('utilisateur-modal').classList.remove('open');
+        }
+
+        document.getElementById('utilisateur-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'utilisateur-modal') closeUtilisateurModal();
         });
 
         function openEtatLivraisonModal(row) {

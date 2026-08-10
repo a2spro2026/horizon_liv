@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inscription;
+use App\Models\Utilisateur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -10,15 +11,30 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'statut' => 'required|string',
+        $validated = $request->validate([
+            'statut' => 'required|in:admin,client,livreur,agence',
             'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
+        $utilisateur = Utilisateur::query()
+            ->where('login', $validated['login'])
+            ->where('statue', $validated['statut'])
+            ->where('password', $validated['password'])
+            ->where('statut', 'actif')
+            ->first();
+
+        if (! $utilisateur) {
+            return back()
+                ->withInput($request->only('statut', 'login'))
+                ->withErrors(['login' => 'Identifiants incorrects ou compte suspendu.']);
+        }
+
         Session::put('auth_user', [
-            'login' => $request->input('login'),
-            'statut' => $request->input('statut'),
+            'id' => $utilisateur->id,
+            'login' => $utilisateur->login,
+            'nom_complet' => $utilisateur->nom_complet,
+            'statut' => $utilisateur->statue,
         ]);
 
         return redirect()->route('admin.dashboard');

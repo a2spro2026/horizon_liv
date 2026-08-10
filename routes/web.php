@@ -33,6 +33,12 @@ Route::put('/admin/livreurs/{livreur}', [AdminController::class, 'updateLivreur'
     ->name('admin.livreurs.update');
 Route::patch('/admin/livreurs/{livreur}/suspendre', [AdminController::class, 'suspendLivreur'])
     ->name('admin.livreurs.suspend');
+Route::post('/admin/utilisateurs', [AdminController::class, 'storeUtilisateur'])
+    ->name('admin.utilisateurs.store');
+Route::put('/admin/utilisateurs/{utilisateur}', [AdminController::class, 'updateUtilisateur'])
+    ->name('admin.utilisateurs.update');
+Route::patch('/admin/utilisateurs/{utilisateur}/suspendre', [AdminController::class, 'suspendUtilisateur'])
+    ->name('admin.utilisateurs.suspend');
 Route::post('/api/livreur/position', [AdminController::class, 'updateLivreurPosition'])
     ->name('api.livreur.position');
 Route::post('/api/destinataire/position', [AdminController::class, 'updateDestinatairePosition'])

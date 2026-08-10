@@ -8,6 +8,7 @@ use App\Models\Inscription;
 use App\Models\LivraisonHistorique;
 use App\Models\Livreur;
 use App\Models\Partenaire;
+use App\Models\Utilisateur;
 use App\Services\GeocodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,7 @@ class AdminController extends Controller
             'carte-livreurs',
             'rapports',
             'configurations',
+            'utilisateur',
             'admin',
         ];
 
@@ -59,6 +61,10 @@ class AdminController extends Controller
 
         if ($section === 'livreurs') {
             return redirect()->route('admin.section', 'fiche-livreur');
+        }
+
+        if ($section === 'configurations') {
+            return redirect()->route('admin.section', 'utilisateur');
         }
 
         return $this->render($section);
@@ -269,6 +275,62 @@ class AdminController extends Controller
         return redirect()->route('admin.section', 'fiche-livreur');
     }
 
+    public function storeUtilisateur(Request $request): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_complet' => 'required|string|max:255',
+            'contact' => 'required|string|max:30',
+            'email' => 'required|email|max:255',
+            'statue' => 'required|in:admin,client,livreur,agence',
+            'login' => 'required|string|max:255|unique:utilisateurs,login',
+            'password' => 'required|string|max:255',
+        ]);
+
+        Utilisateur::create([
+            ...$validated,
+            'statut' => 'actif',
+        ]);
+
+        return redirect()->route('admin.section', 'utilisateur');
+    }
+
+    public function updateUtilisateur(Request $request, Utilisateur $utilisateur): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'nom_complet' => 'required|string|max:255',
+            'contact' => 'required|string|max:30',
+            'email' => 'required|email|max:255',
+            'statue' => 'required|in:admin,client,livreur,agence',
+            'login' => 'required|string|max:255|unique:utilisateurs,login,'.$utilisateur->id,
+            'password' => 'required|string|max:255',
+        ]);
+
+        $utilisateur->update($validated);
+
+        return redirect()->route('admin.section', 'utilisateur');
+    }
+
+    public function suspendUtilisateur(Utilisateur $utilisateur): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $utilisateur->update([
+            'statut' => $utilisateur->statut === 'suspendu' ? 'actif' : 'suspendu',
+        ]);
+
+        return redirect()->route('admin.section', 'utilisateur');
+    }
+
     public function updateLivreurPosition(Request $request)
     {
         $validated = $request->validate([
@@ -370,6 +432,7 @@ class AdminController extends Controller
         $livraisonHistoriques = collect();
         $livreurs = collect();
         $etatLivraisons = collect();
+        $utilisateurs = collect();
         $mapPoints = [];
 
         if ($section === 'nvx-insc') {
@@ -399,6 +462,10 @@ class AdminController extends Controller
 
         if ($section === 'fiche-livreur') {
             $livreurs = Livreur::query()->latest()->get();
+        }
+
+        if ($section === 'utilisateur') {
+            $utilisateurs = Utilisateur::query()->latest()->get();
         }
 
         if (in_array($section, ['dashboard', 'carte-livreurs'], true)) {
@@ -465,6 +532,7 @@ class AdminController extends Controller
             'livraisonHistoriques' => $livraisonHistoriques,
             'livreurs' => $livreurs,
             'etatLivraisons' => $etatLivraisons,
+            'utilisateurs' => $utilisateurs,
             'mapPoints' => $mapPoints,
         ]);
     }

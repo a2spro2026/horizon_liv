@@ -227,6 +227,10 @@
             <div class="alert-success">{{ session('register_success') }}</div>
         @endif
 
+        @error('login')
+            <div class="alert-success" style="background:#fee2e2;color:#991b1b;border-color:#fecaca;">{{ $message }}</div>
+        @enderror
+
         <form method="POST" action="{{ route('login') }}" autocomplete="on">
             @csrf
             <input type="hidden" name="_form" value="login">
