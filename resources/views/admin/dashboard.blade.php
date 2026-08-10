@@ -1948,6 +1948,10 @@
                                     <label for="add_l_ville">Ville</label>
                                     <input id="add_l_ville" type="text" name="ville" required>
                                 </div>
+                                <div class="field">
+                                    <label for="add_l_adresse">Quartier / Adresse</label>
+                                    <input id="add_l_adresse" type="text" name="adresse" placeholder="ex: Kamlia" required>
+                                </div>
                                 <div class="field" style="grid-column: 1 / -1;">
                                     <label for="add_l_paiement">Type Paiement</label>
                                     <select id="add_l_paiement" name="type_paiement" required>
@@ -1980,6 +1984,7 @@
                                         <th>Contact</th>
                                         <th>E-mail</th>
                                         <th>Ville</th>
+                                        <th>Quartier / Adresse</th>
                                         <th>Type Paiement</th>
                                         <th>Actions</th>
                                     </tr>
@@ -1993,6 +1998,7 @@
                                             data-contact="{{ $l->contact }}"
                                             data-email="{{ $l->email }}"
                                             data-ville="{{ $l->ville }}"
+                                            data-adresse="{{ $l->adresse }}"
                                             data-paiement="{{ $l->type_paiement }}"
                                             data-date="{{ $l->created_at->format('d/m/Y') }}"
                                         >
@@ -2002,6 +2008,7 @@
                                             <td>{{ $l->contact }}</td>
                                             <td>{{ $l->email }}</td>
                                             <td>{{ $l->ville }}</td>
+                                            <td>{{ $l->adresse ?: '—' }}</td>
                                             <td>{{ $l->type_paiement }}</td>
                                             <td>
                                                 <div class="actions">
@@ -2224,6 +2231,7 @@
                 <div class="field"><label>Contact</label><input id="l_contact" name="contact" type="text" required></div>
                 <div class="field"><label>E-mail</label><input id="l_email" name="email" type="email" required></div>
                 <div class="field"><label>Ville</label><input id="l_ville" name="ville" type="text" required></div>
+                <div class="field"><label>Quartier / Adresse</label><input id="l_adresse" name="adresse" type="text" required></div>
                 <div class="field">
                     <label>Type Paiement</label>
                     <select id="l_paiement" name="type_paiement" required>
@@ -2412,10 +2420,11 @@
             document.getElementById('l_contact').value = row.dataset.contact;
             document.getElementById('l_email').value = row.dataset.email;
             document.getElementById('l_ville').value = row.dataset.ville;
+            document.getElementById('l_adresse').value = row.dataset.adresse || '';
             document.getElementById('l_paiement').value = row.dataset.paiement || 'Salaire';
 
             const editable = mode === 'edit';
-            ['l_nom','l_contact','l_email','l_ville','l_paiement'].forEach((fid) => {
+            ['l_nom','l_contact','l_email','l_ville','l_adresse','l_paiement'].forEach((fid) => {
                 document.getElementById(fid).disabled = !editable;
             });
 

@@ -216,13 +216,14 @@ class AdminController extends Controller
             'contact' => 'required|string|max:30',
             'email' => 'required|email|max:255',
             'ville' => 'required|string|max:255',
+            'adresse' => 'required|string|max:255',
             'type_paiement' => 'required|in:Salaire,Commission,Pourcentage',
         ]);
 
         Livreur::create([
             ...$validated,
             'statut' => 'actif',
-            ...$this->coordsFromVille($validated['ville']),
+            ...$this->coordsFromAdresse($validated['adresse'] ?? null, $validated['ville']),
         ]);
 
         return redirect()->route('admin.section', 'fiche-livreur');
@@ -239,12 +240,15 @@ class AdminController extends Controller
             'contact' => 'required|string|max:30',
             'email' => 'required|email|max:255',
             'ville' => 'required|string|max:255',
+            'adresse' => 'required|string|max:255',
             'type_paiement' => 'required|in:Salaire,Commission,Pourcentage',
         ]);
 
         $payload = $validated;
-        if ($livreur->ville !== $validated['ville'] || ! $livreur->hasPosition()) {
-            $payload = [...$payload, ...$this->coordsFromVille($validated['ville'])];
+        $adresseChanged = ($livreur->adresse ?? '') !== ($validated['adresse'] ?? '');
+        $villeChanged = $livreur->ville !== $validated['ville'];
+        if ($adresseChanged || $villeChanged || ! $livreur->hasPosition()) {
+            $payload = [...$payload, ...$this->coordsFromAdresse($validated['adresse'] ?? null, $validated['ville'])];
         }
 
         $livreur->update($payload);
@@ -421,6 +425,7 @@ class AdminController extends Controller
                     'contact' => $l->contact,
                     'email' => $l->email,
                     'ville' => $l->ville,
+                    'adresse' => $l->adresse,
                     'lat' => (float) $l->latitude,
                     'lng' => (float) $l->longitude,
                     'updated' => $l->derniere_position_at?->format('d/m/Y H:i'),
@@ -469,7 +474,15 @@ class AdminController extends Controller
      */
     private function coordsFromVille(string $ville): array
     {
-        $pos = app(GeocodeService::class)->fromVille($ville);
+        return $this->coordsFromAdresse(null, $ville);
+    }
+
+    /**
+     * @return array{latitude: float, longitude: float, derniere_position_at: \Illuminate\Support\Carbon}|array{}
+     */
+    private function coordsFromAdresse(?string $adresse, string $ville): array
+    {
+        $pos = app(GeocodeService::class)->fromAdresse($adresse, $ville);
         if (! $pos) {
             return [];
         }
@@ -491,7 +504,7 @@ class AdminController extends Controller
             })
             ->get()
             ->each(function (Livreur $livreur) use ($geo) {
-                $pos = $geo->fromVille($livreur->ville);
+                $pos = $geo->fromAdresse($livreur->adresse, $livreur->ville);
                 if ($pos) {
                     $livreur->update([
                         'latitude' => $pos['lat'],

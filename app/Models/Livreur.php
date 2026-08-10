@@ -12,6 +12,7 @@ class Livreur extends Model
         'contact',
         'email',
         'ville',
+        'adresse',
         'type_paiement',
         'statut',
         'latitude',

@@ -37,7 +37,7 @@
     <div class="map-legend">
         <span><span class="legend-dot legend-livreur"></span> <strong>{{ $livreurCount }}</strong> livreur(s)</span>
         <span><span class="legend-dot legend-client"></span> <strong>{{ $clientCount }}</strong> client(s)</span>
-        <span>Position initiale = ville saisie (GPS précis ensuite via mobile)</span>
+        <span>Position = quartier/adresse (GPS précis ensuite via mobile)</span>
     </div>
 </div>
 
@@ -80,6 +80,7 @@
                 '<div class="popup-name">' + (p.nom || '') + '</div>' +
                 '<div class="popup-meta">' +
                 '<strong>' + (isClient ? 'Client' : 'Livreur') + '</strong><br>' +
+                (p.adresse ? (p.adresse + '<br>') : '') +
                 (p.ville || '') + '<br>' + (p.contact || '') +
                 (p.email ? ('<br>' + p.email) : '') +
                 (p.activite ? ('<br>' + p.activite) : '') +

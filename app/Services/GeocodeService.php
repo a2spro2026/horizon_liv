@@ -43,6 +43,56 @@ class GeocodeService
     ];
 
     /**
+     * Quartiers connus (clé = "quartier|ville" normalisés).
+     *
+     * @var array<string, array{0: float, 1: float}>
+     */
+    private array $neighborhoods = [
+        'kamlia|meknes' => [33.877493, -5.584819],
+        'kamilia|meknes' => [33.877493, -5.584819],
+        'kamiliya|meknes' => [33.877493, -5.584819],
+        'diar kamiliya|meknes' => [33.877493, -5.584819],
+        'hamria|meknes' => [33.8950, -5.5540],
+        'hamriya|meknes' => [33.8950, -5.5540],
+        'ville nouvelle|meknes' => [33.8955, -5.5470],
+        'medina|meknes' => [33.8940, -5.5640],
+        'sidi said|meknes' => [33.8700, -5.5400],
+        'sidi bouzekri|meknes' => [33.9100, -5.5400],
+        'agdal|meknes' => [33.8800, -5.5600],
+        'rouamzine|meknes' => [33.8850, -5.5750],
+    ];
+
+    /**
+     * @return array{lat: float, lng: float}|null
+     */
+    public function fromAdresse(?string $adresse, ?string $ville): ?array
+    {
+        $adresse = $adresse ? trim($adresse) : '';
+        $ville = $ville ? trim($ville) : '';
+
+        if ($adresse !== '' && $ville !== '') {
+            $local = $this->lookupNeighborhood($adresse, $ville);
+            if ($local) {
+                return $local;
+            }
+
+            $remote = $this->nominatim($adresse.', '.$ville.', Morocco');
+            if ($remote) {
+                return $remote;
+            }
+        }
+
+        if ($adresse !== '') {
+            $remote = $this->nominatim($adresse.($ville !== '' ? ', '.$ville : '').', Morocco');
+            if ($remote) {
+                return $remote;
+            }
+        }
+
+        return $this->fromVille($ville);
+    }
+
+    /**
      * @return array{lat: float, lng: float}|null
      */
     public function fromVille(?string $ville): ?array
@@ -51,16 +101,44 @@ class GeocodeService
             return null;
         }
 
-        $key = Str::lower(trim($ville));
-        $key = str_replace(['é', 'è', 'ê', 'à', 'ù', 'ô'], ['e', 'e', 'e', 'a', 'u', 'o'], $key);
+        $key = $this->normalize(trim($ville));
 
         foreach ($this->moroccoCities as $city => $coords) {
-            $normalizedCity = str_replace(['é', 'è', 'ê', 'à', 'ù', 'ô'], ['e', 'e', 'e', 'a', 'u', 'o'], $city);
+            $normalizedCity = $this->normalize($city);
             if ($key === $normalizedCity || str_contains($key, $normalizedCity) || str_contains($normalizedCity, $key)) {
                 return ['lat' => $coords[0], 'lng' => $coords[1]];
             }
         }
 
+        return $this->nominatim(trim($ville).', Morocco');
+    }
+
+    /**
+     * @return array{lat: float, lng: float}|null
+     */
+    private function lookupNeighborhood(string $adresse, string $ville): ?array
+    {
+        $addr = $this->normalize($adresse);
+        $city = $this->normalize($ville);
+
+        foreach ($this->neighborhoods as $key => $coords) {
+            [$quartier, $qCity] = explode('|', $key, 2);
+            if ($city !== $this->normalize($qCity) && ! str_contains($city, $this->normalize($qCity))) {
+                continue;
+            }
+            if ($addr === $quartier || str_contains($addr, $quartier) || str_contains($quartier, $addr)) {
+                return ['lat' => $coords[0], 'lng' => $coords[1]];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{lat: float, lng: float}|null
+     */
+    private function nominatim(string $query): ?array
+    {
         try {
             $response = Http::timeout(8)
                 ->withHeaders([
@@ -71,7 +149,7 @@ class GeocodeService
                     'format' => 'json',
                     'limit' => 1,
                     'countrycodes' => 'ma',
-                    'q' => trim($ville) . ', Morocco',
+                    'q' => $query,
                 ]);
 
             if ($response->successful()) {
@@ -84,9 +162,20 @@ class GeocodeService
                 }
             }
         } catch (\Throwable $e) {
-            Log::warning('Geocode failed for ville: '.$ville, ['error' => $e->getMessage()]);
+            Log::warning('Geocode failed: '.$query, ['error' => $e->getMessage()]);
         }
 
         return null;
+    }
+
+    private function normalize(string $value): string
+    {
+        $key = Str::lower(trim($value));
+
+        return str_replace(
+            ['é', 'è', 'ê', 'à', 'ù', 'ô', 'î', 'ï', 'ç'],
+            ['e', 'e', 'e', 'a', 'u', 'o', 'i', 'i', 'c'],
+            $key
+        );
     }
 }
