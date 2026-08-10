@@ -1423,9 +1423,11 @@
                     </div>
 
                     @if (($partenaires ?? collect())->isEmpty())
-                        <p class="empty-state">Aucun partenaire pour le moment.</p>
+                        <div id="partenaires-list">
+                            <p class="empty-state">Aucun partenaire pour le moment.</p>
+                        </div>
                     @else
-                        <div class="table-wrap" id="partenaires-print-area">
+                        <div class="table-wrap" id="partenaires-list">
                             <table class="data-table" id="partenaires-table">
                                 <thead>
                                     <tr>
@@ -1592,11 +1594,14 @@
         });
 
         const addPanel = document.getElementById('add-partenaire-panel');
+        const partenairesList = document.getElementById('partenaires-list');
         document.getElementById('open-add-partenaire')?.addEventListener('click', () => {
             addPanel?.classList.add('open');
+            if (partenairesList) partenairesList.style.display = 'none';
         });
         document.getElementById('close-add-partenaire')?.addEventListener('click', () => {
             addPanel?.classList.remove('open');
+            if (partenairesList) partenairesList.style.display = '';
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
