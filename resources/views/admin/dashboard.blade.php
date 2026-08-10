@@ -890,6 +890,14 @@
             background: var(--surface);
         }
 
+        .map-collapsible.is-hidden {
+            display: none;
+        }
+
+        .map-toggle-ico--show { display: none; }
+        .btn.is-map-hidden .map-toggle-ico--hide { display: none; }
+        .btn.is-map-hidden .map-toggle-ico--show { display: block; }
+
         #livreurs-map,
         .livreurs-map {
             width: 100%;

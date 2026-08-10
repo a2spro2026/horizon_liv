@@ -4,6 +4,9 @@
     $points = $mapPoints ?? [];
     $livreurCount = collect($points)->where('type', 'livreur')->count();
     $clientCount = collect($points)->where('type', 'client')->count();
+    $mapDomId = $mapId ?? 'livreurs-map';
+    $mapBodyId = $mapDomId . '-body';
+    $mapToggleId = $mapDomId . '-toggle';
 @endphp
 
 @if (! empty($showMapHeader))
@@ -19,37 +22,53 @@
                 {{ $mapTitle ?? 'Carte des positions' }}
             </span>
         </h3>
-        @if (! empty($showMapClose))
-            <div class="section-actions">
+        <div class="section-actions">
+            <button type="button" class="btn btn-add" id="{{ $mapToggleId }}" aria-controls="{{ $mapBodyId }}" aria-expanded="true">
+                <svg class="map-toggle-ico map-toggle-ico--hide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/>
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                </svg>
+                <svg class="map-toggle-ico map-toggle-ico--show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span class="map-toggle-label">Masquer</span>
+            </button>
+            @if (! empty($showMapClose))
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
                     Fermer
                 </a>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 @endif
 
-<div class="livreurs-map-wrap">
-    <div id="{{ $mapId ?? 'livreurs-map' }}" class="livreurs-map" role="img" aria-label="Carte livreurs et clients"></div>
-    <div class="map-legend">
-        <span><span class="legend-dot legend-livreur"></span> <strong>{{ $livreurCount }}</strong> livreur(s)</span>
-        <span><span class="legend-dot legend-client"></span> <strong>{{ $clientCount }}</strong> client(s)</span>
-        <span>Position = quartier/adresse (GPS précis ensuite via mobile)</span>
+<div id="{{ $mapBodyId }}" class="map-collapsible">
+    <div class="livreurs-map-wrap">
+        <div id="{{ $mapDomId }}" class="livreurs-map" role="img" aria-label="Carte livreurs et clients"></div>
+        <div class="map-legend">
+            <span><span class="legend-dot legend-livreur"></span> <strong>{{ $livreurCount }}</strong> livreur(s)</span>
+            <span><span class="legend-dot legend-client"></span> <strong>{{ $clientCount }}</strong> client(s)</span>
+            <span>Position = quartier/adresse (GPS précis ensuite via mobile)</span>
+        </div>
     </div>
+
+    @if (empty($points))
+        <p class="empty-state" style="margin-top:1rem;">Aucune position enregistrée. Les livreurs et clients localisés apparaîtront ici.</p>
+    @endif
 </div>
-
-@if (empty($points))
-    <p class="empty-state" style="margin-top:1rem;">Aucune position enregistrée. Les livreurs et clients localisés apparaîtront ici.</p>
-@endif
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     (function () {
         const points = @json($points);
-        const mapId = @json($mapId ?? 'livreurs-map');
+        const mapId = @json($mapDomId);
+        const bodyId = @json($mapBodyId);
+        const toggleId = @json($mapToggleId);
+        const storageKey = 'horizon-map-visible-' + mapId;
+
         const map = L.map(mapId).setView([31.7917, -7.0926], 6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -96,6 +115,42 @@
             map.fitBounds(bounds, { padding: [40, 40] });
         }
 
+        function setMapVisible(visible) {
+            const body = document.getElementById(bodyId);
+            const toggle = document.getElementById(toggleId);
+            if (!body) return;
+
+            body.classList.toggle('is-hidden', !visible);
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', visible ? 'true' : 'false');
+                toggle.classList.toggle('is-map-hidden', !visible);
+                const label = toggle.querySelector('.map-toggle-label');
+                if (label) label.textContent = visible ? 'Masquer' : 'Afficher';
+            }
+
+            try {
+                localStorage.setItem(storageKey, visible ? '1' : '0');
+            } catch (e) {}
+
+            if (visible) {
+                setTimeout(() => map.invalidateSize(), 50);
+            }
+        }
+
+        const toggle = document.getElementById(toggleId);
+        toggle?.addEventListener('click', () => {
+            const body = document.getElementById(bodyId);
+            const currentlyVisible = !body?.classList.contains('is-hidden');
+            setMapVisible(!currentlyVisible);
+        });
+
+        let initiallyVisible = true;
+        try {
+            const saved = localStorage.getItem(storageKey);
+            if (saved === '0') initiallyVisible = false;
+        } catch (e) {}
+
+        setMapVisible(initiallyVisible);
         setTimeout(() => map.invalidateSize(), 200);
     })();
 </script>
