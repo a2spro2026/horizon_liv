@@ -37,7 +37,7 @@
     <div class="map-legend">
         <span><span class="legend-dot legend-livreur"></span> <strong>{{ $livreurCount }}</strong> livreur(s)</span>
         <span><span class="legend-dot legend-client"></span> <strong>{{ $clientCount }}</strong> client(s)</span>
-        <span>Cliquez un marqueur pour voir le détail</span>
+        <span>Position initiale = ville saisie (GPS précis ensuite via mobile)</span>
     </div>
 </div>
 

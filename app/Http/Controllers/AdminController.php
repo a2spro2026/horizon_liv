@@ -8,6 +8,7 @@ use App\Models\Inscription;
 use App\Models\LivraisonHistorique;
 use App\Models\Livreur;
 use App\Models\Partenaire;
+use App\Services\GeocodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -196,7 +197,10 @@ class AdminController extends Controller
             'activite' => 'required|string|max:255',
         ]);
 
-        Destinataire::create($validated);
+        Destinataire::create([
+            ...$validated,
+            ...$this->coordsFromVille($validated['ville']),
+        ]);
 
         return redirect()->route('admin.section', 'fiche-destinataire');
     }
@@ -218,6 +222,7 @@ class AdminController extends Controller
         Livreur::create([
             ...$validated,
             'statut' => 'actif',
+            ...$this->coordsFromVille($validated['ville']),
         ]);
 
         return redirect()->route('admin.section', 'fiche-livreur');
@@ -237,7 +242,12 @@ class AdminController extends Controller
             'type_paiement' => 'required|in:Salaire,Commission,Pourcentage',
         ]);
 
-        $livreur->update($validated);
+        $payload = $validated;
+        if ($livreur->ville !== $validated['ville'] || ! $livreur->hasPosition()) {
+            $payload = [...$payload, ...$this->coordsFromVille($validated['ville'])];
+        }
+
+        $livreur->update($payload);
 
         return redirect()->route('admin.section', 'fiche-livreur');
     }
@@ -388,6 +398,8 @@ class AdminController extends Controller
         }
 
         if (in_array($section, ['dashboard', 'carte-livreurs'], true)) {
+            $this->backfillMissingGpsPositions();
+
             $livreursLocalises = Livreur::query()
                 ->where('statut', 'actif')
                 ->whereNotNull('latitude')
@@ -450,5 +462,59 @@ class AdminController extends Controller
             'etatLivraisons' => $etatLivraisons,
             'mapPoints' => $mapPoints,
         ]);
+    }
+
+    /**
+     * @return array{latitude: float, longitude: float, derniere_position_at: \Illuminate\Support\Carbon}|array{}
+     */
+    private function coordsFromVille(string $ville): array
+    {
+        $pos = app(GeocodeService::class)->fromVille($ville);
+        if (! $pos) {
+            return [];
+        }
+
+        return [
+            'latitude' => $pos['lat'],
+            'longitude' => $pos['lng'],
+            'derniere_position_at' => now(),
+        ];
+    }
+
+    private function backfillMissingGpsPositions(): void
+    {
+        $geo = app(GeocodeService::class);
+
+        Livreur::query()
+            ->where(function ($q) {
+                $q->whereNull('latitude')->orWhereNull('longitude');
+            })
+            ->get()
+            ->each(function (Livreur $livreur) use ($geo) {
+                $pos = $geo->fromVille($livreur->ville);
+                if ($pos) {
+                    $livreur->update([
+                        'latitude' => $pos['lat'],
+                        'longitude' => $pos['lng'],
+                        'derniere_position_at' => now(),
+                    ]);
+                }
+            });
+
+        Destinataire::query()
+            ->where(function ($q) {
+                $q->whereNull('latitude')->orWhereNull('longitude');
+            })
+            ->get()
+            ->each(function (Destinataire $destinataire) use ($geo) {
+                $pos = $geo->fromVille($destinataire->ville);
+                if ($pos) {
+                    $destinataire->update([
+                        'latitude' => $pos['lat'],
+                        'longitude' => $pos['lng'],
+                        'derniere_position_at' => now(),
+                    ]);
+                }
+            });
     }
 }
