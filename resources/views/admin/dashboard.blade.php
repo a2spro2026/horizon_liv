@@ -1016,7 +1016,8 @@
             text-align: center;
         }
 
-        .modal input {
+        .modal input,
+        .modal select {
             width: 100%;
             border: 1px solid var(--line);
             background: var(--chip-bg);
@@ -1027,7 +1028,13 @@
             text-align: center;
         }
 
-        .modal input:disabled {
+        .modal select option {
+            color: #0b1628;
+            background: #fff;
+        }
+
+        .modal input:disabled,
+        .modal select:disabled {
             opacity: 0.85;
         }
 
