@@ -915,6 +915,19 @@
             font-weight: 700;
         }
 
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.25rem;
+            vertical-align: middle;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+        }
+
+        .legend-livreur { background: #f26522; }
+        .legend-client { background: #1d4ed8; }
+
         .leaflet-popup-content {
             text-align: center;
             margin: 0.65rem 0.85rem;
@@ -1477,7 +1490,7 @@
                         'mapId' => 'dashboard-livreurs-map',
                         'showMapHeader' => true,
                         'showMapClose' => false,
-                        'mapTitle' => 'Localisation des livreurs',
+                        'mapTitle' => 'Localisation livreurs & clients',
                     ])
 
                 @elseif ($section === 'nvx-insc')

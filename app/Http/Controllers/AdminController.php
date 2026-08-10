@@ -306,6 +306,43 @@ class AdminController extends Controller
         ]);
     }
 
+    public function updateDestinatairePosition(Request $request)
+    {
+        $validated = $request->validate([
+            'contact' => 'required|string|max:30',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        $destinataire = Destinataire::query()
+            ->where('contact', $validated['contact'])
+            ->first();
+
+        if (! $destinataire) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Destinataire (client) introuvable.',
+            ], 404);
+        }
+
+        $destinataire->update([
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'derniere_position_at' => now(),
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'destinataire' => [
+                'id' => $destinataire->id,
+                'nom_complet' => $destinataire->nom_complet,
+                'latitude' => $destinataire->latitude,
+                'longitude' => $destinataire->longitude,
+                'derniere_position_at' => $destinataire->derniere_position_at?->toIso8601String(),
+            ],
+        ]);
+    }
+
     private function render(string $section): View|RedirectResponse
     {
         if (! session('auth_user')) {
@@ -351,15 +388,22 @@ class AdminController extends Controller
         }
 
         if (in_array($section, ['dashboard', 'carte-livreurs'], true)) {
-            $livreurs = Livreur::query()
+            $livreursLocalises = Livreur::query()
                 ->where('statut', 'actif')
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->orderBy('nom_complet')
                 ->get();
 
-            $mapPoints = $livreurs->map(static function (Livreur $l): array {
+            $clientsLocalises = Destinataire::query()
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('nom_complet')
+                ->get();
+
+            $mapPoints = $livreursLocalises->map(static function (Livreur $l): array {
                 return [
+                    'type' => 'livreur',
                     'id' => $l->id,
                     'nom' => $l->nom_complet,
                     'contact' => $l->contact,
@@ -369,7 +413,22 @@ class AdminController extends Controller
                     'lng' => (float) $l->longitude,
                     'updated' => $l->derniere_position_at?->format('d/m/Y H:i'),
                 ];
-            })->values()->all();
+            })->concat($clientsLocalises->map(static function (Destinataire $d): array {
+                return [
+                    'type' => 'client',
+                    'id' => $d->id,
+                    'nom' => $d->nom_complet,
+                    'contact' => $d->contact,
+                    'email' => '',
+                    'ville' => $d->ville,
+                    'activite' => $d->activite,
+                    'lat' => (float) $d->latitude,
+                    'lng' => (float) $d->longitude,
+                    'updated' => $d->derniere_position_at?->format('d/m/Y H:i'),
+                ];
+            }))->values()->all();
+
+            $livreurs = $livreursLocalises;
         }
 
         if ($section === 'etat-livraison') {

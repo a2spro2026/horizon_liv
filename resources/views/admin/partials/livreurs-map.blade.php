@@ -1,5 +1,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 
+@php
+    $points = $mapPoints ?? [];
+    $livreurCount = collect($points)->where('type', 'livreur')->count();
+    $clientCount = collect($points)->where('type', 'client')->count();
+@endphp
+
 @if (! empty($showMapHeader))
     <div class="section-header">
         <h3 class="section-title">
@@ -9,8 +15,8 @@
                 </svg>
             </span>
             <span class="section-title-text">
-                <small>Livreurs</small>
-                {{ $mapTitle ?? 'Carte Livreurs' }}
+                <small>Localisation</small>
+                {{ $mapTitle ?? 'Carte des positions' }}
             </span>
         </h3>
         @if (! empty($showMapClose))
@@ -27,21 +33,22 @@
 @endif
 
 <div class="livreurs-map-wrap">
-    <div id="{{ $mapId ?? 'livreurs-map' }}" class="livreurs-map" role="img" aria-label="Carte des livreurs"></div>
+    <div id="{{ $mapId ?? 'livreurs-map' }}" class="livreurs-map" role="img" aria-label="Carte livreurs et clients"></div>
     <div class="map-legend">
-        <span><strong>{{ count($mapPoints ?? []) }}</strong> livreur(s) localisé(s)</span>
+        <span><span class="legend-dot legend-livreur"></span> <strong>{{ $livreurCount }}</strong> livreur(s)</span>
+        <span><span class="legend-dot legend-client"></span> <strong>{{ $clientCount }}</strong> client(s)</span>
         <span>Cliquez un marqueur pour voir le détail</span>
     </div>
 </div>
 
-@if (empty($mapPoints))
-    <p class="empty-state" style="margin-top:1rem;">Aucun livreur localisé pour le moment. Les positions apparaîtront ici dès qu’un livreur enverra son GPS.</p>
+@if (empty($points))
+    <p class="empty-state" style="margin-top:1rem;">Aucune position enregistrée. Les livreurs et clients localisés apparaîtront ici.</p>
 @endif
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     (function () {
-        const points = @json($mapPoints ?? []);
+        const points = @json($points);
         const mapId = @json($mapId ?? 'livreurs-map');
         const map = L.map(mapId).setView([31.7917, -7.0926], 6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -49,20 +56,33 @@
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        const orangeIcon = L.divIcon({
-            className: '',
-            html: '<div style="width:16px;height:16px;border-radius:50%;background:#f26522;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);"></div>',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
-            popupAnchor: [0, -10]
-        });
+        function makeIcon(color) {
+            return L.divIcon({
+                className: '',
+                html: '<div style="width:16px;height:16px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+                popupAnchor: [0, -10]
+            });
+        }
 
+        const livreurIcon = makeIcon('#f26522');
+        const clientIcon = makeIcon('#1d4ed8');
         const bounds = [];
+
         points.forEach((p) => {
-            const marker = L.marker([p.lat, p.lng], { icon: orangeIcon }).addTo(map);
+            const isClient = p.type === 'client';
+            const marker = L.marker([p.lat, p.lng], {
+                icon: isClient ? clientIcon : livreurIcon
+            }).addTo(map);
+
             marker.bindPopup(
                 '<div class="popup-name">' + (p.nom || '') + '</div>' +
-                '<div class="popup-meta">' + (p.ville || '') + '<br>' + (p.contact || '') + '<br>' + (p.email || '') +
+                '<div class="popup-meta">' +
+                '<strong>' + (isClient ? 'Client' : 'Livreur') + '</strong><br>' +
+                (p.ville || '') + '<br>' + (p.contact || '') +
+                (p.email ? ('<br>' + p.email) : '') +
+                (p.activite ? ('<br>' + p.activite) : '') +
                 (p.updated ? ('<br>MAJ: ' + p.updated) : '') +
                 '</div>'
             );
