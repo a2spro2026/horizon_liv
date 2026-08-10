@@ -319,6 +319,7 @@ class AdminController extends Controller
         $livraisonHistoriques = collect();
         $livreurs = collect();
         $etatLivraisons = collect();
+        $mapPoints = [];
 
         if ($section === 'nvx-insc') {
             $inscriptions = Inscription::query()
@@ -356,6 +357,19 @@ class AdminController extends Controller
                 ->whereNotNull('longitude')
                 ->orderBy('nom_complet')
                 ->get();
+
+            $mapPoints = $livreurs->map(static function (Livreur $l): array {
+                return [
+                    'id' => $l->id,
+                    'nom' => $l->nom_complet,
+                    'contact' => $l->contact,
+                    'email' => $l->email,
+                    'ville' => $l->ville,
+                    'lat' => (float) $l->latitude,
+                    'lng' => (float) $l->longitude,
+                    'updated' => $l->derniere_position_at?->format('d/m/Y H:i'),
+                ];
+            })->values()->all();
         }
 
         if ($section === 'etat-livraison') {
@@ -375,6 +389,7 @@ class AdminController extends Controller
             'livraisonHistoriques' => $livraisonHistoriques,
             'livreurs' => $livreurs,
             'etatLivraisons' => $etatLivraisons,
+            'mapPoints' => $mapPoints,
         ]);
     }
 }

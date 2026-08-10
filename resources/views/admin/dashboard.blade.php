@@ -2119,18 +2119,7 @@
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
                     <script>
                         (function () {
-                            const points = @json(
-                                ($livreurs ?? collect())->map(fn ($l) => [
-                                    'id' => $l->id,
-                                    'nom' => $l->nom_complet,
-                                    'contact' => $l->contact,
-                                    'email' => $l->email,
-                                    'ville' => $l->ville,
-                                    'lat' => (float) $l->latitude,
-                                    'lng' => (float) $l->longitude,
-                                    'updated' => optional($l->derniere_position_at)->format('d/m/Y H:i'),
-                                ])->values()
-                            );
+                            const points = @json($mapPoints ?? []);
 
                             const map = L.map('livreurs-map').setView([31.7917, -7.0926], 6);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -2150,10 +2139,10 @@
                             points.forEach((p) => {
                                 const marker = L.marker([p.lat, p.lng], { icon: orangeIcon }).addTo(map);
                                 marker.bindPopup(
-                                    `<div class="popup-name">${p.nom}</div>` +
-                                    `<div class="popup-meta">${p.ville || ''}<br>${p.contact || ''}<br>${p.email || ''}` +
-                                    (p.updated ? `<br>MAJ: ${p.updated}` : '') +
-                                    `</div>`
+                                    '<div class="popup-name">' + (p.nom || '') + '</div>' +
+                                    '<div class="popup-meta">' + (p.ville || '') + '<br>' + (p.contact || '') + '<br>' + (p.email || '') +
+                                    (p.updated ? ('<br>MAJ: ' + p.updated) : '') +
+                                    '</div>'
                                 );
                                 bounds.push([p.lat, p.lng]);
                             });
