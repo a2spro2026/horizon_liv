@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Commande;
 use App\Models\Destinataire;
 use App\Models\EtatLivraison;
 use App\Models\Inscription;
@@ -34,6 +35,8 @@ class AdminController extends Controller
             'historique-livraison',
             'balances-paiement',
             'commandes',
+            'etat-commande',
+            'balance-commande',
             'paiement',
             'parametres',
             'nvx-insc',
@@ -65,6 +68,10 @@ class AdminController extends Controller
 
         if ($section === 'configurations') {
             return redirect()->route('admin.section', 'utilisateur');
+        }
+
+        if ($section === 'commandes') {
+            return redirect()->route('admin.section', 'etat-commande');
         }
 
         return $this->render($section);
@@ -331,6 +338,88 @@ class AdminController extends Controller
         return redirect()->route('admin.section', 'utilisateur');
     }
 
+    public function storeCommande(Request $request): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'partenaire_id' => 'required|exists:partenaires,id',
+            'nom_destinataire' => 'required|string|max:255',
+            'contact_destinataire' => 'required|string|max:30',
+            'adresse' => 'required|string|max:255',
+            'montant_total' => 'required|numeric|min:0',
+            'statue' => 'required|in:confirmee,retour,reportee,annulee',
+            'etat' => 'required|in:payee,non_payee',
+        ]);
+
+        $partenaire = Partenaire::query()->findOrFail($validated['partenaire_id']);
+
+        Commande::create([
+            'numero_cmd' => Commande::generateNumero(),
+            'partenaire_id' => $partenaire->id,
+            'nom_partenaire' => $partenaire->nom_client,
+            'nom_destinataire' => $validated['nom_destinataire'],
+            'contact_destinataire' => $validated['contact_destinataire'],
+            'adresse' => $validated['adresse'],
+            'montant_total' => $validated['montant_total'],
+            'statue' => $validated['statue'],
+            'etat' => $validated['etat'],
+        ]);
+
+        return redirect()
+            ->route('admin.section', 'etat-commande')
+            ->with('admin_success', 'Commande ajoutée avec succès.');
+    }
+
+    public function updateCommande(Request $request, Commande $commande): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $validated = $request->validate([
+            'partenaire_id' => 'required|exists:partenaires,id',
+            'nom_destinataire' => 'required|string|max:255',
+            'contact_destinataire' => 'required|string|max:30',
+            'adresse' => 'required|string|max:255',
+            'montant_total' => 'required|numeric|min:0',
+            'statue' => 'required|in:confirmee,retour,reportee,annulee',
+            'etat' => 'required|in:payee,non_payee',
+        ]);
+
+        $partenaire = Partenaire::query()->findOrFail($validated['partenaire_id']);
+
+        $commande->update([
+            'partenaire_id' => $partenaire->id,
+            'nom_partenaire' => $partenaire->nom_client,
+            'nom_destinataire' => $validated['nom_destinataire'],
+            'contact_destinataire' => $validated['contact_destinataire'],
+            'adresse' => $validated['adresse'],
+            'montant_total' => $validated['montant_total'],
+            'statue' => $validated['statue'],
+            'etat' => $validated['etat'],
+        ]);
+
+        return redirect()
+            ->route('admin.section', 'etat-commande')
+            ->with('admin_success', 'Commande mise à jour.');
+    }
+
+    public function destroyCommande(Commande $commande): RedirectResponse
+    {
+        if (! session('auth_user')) {
+            return redirect()->route('home');
+        }
+
+        $commande->delete();
+
+        return redirect()
+            ->route('admin.section', 'etat-commande')
+            ->with('admin_success', 'Commande supprimée.');
+    }
+
     public function updateLivreurPosition(Request $request)
     {
         $validated = $request->validate([
@@ -433,6 +522,14 @@ class AdminController extends Controller
         $livreurs = collect();
         $etatLivraisons = collect();
         $utilisateurs = collect();
+        $commandes = collect();
+        $commandeStats = [
+            'total' => 0,
+            'total_paiement' => 0,
+            'confirmee' => 0,
+            'retour' => 0,
+            'annulee' => 0,
+        ];
         $mapPoints = [];
 
         if ($section === 'nvx-insc') {
@@ -522,6 +619,18 @@ class AdminController extends Controller
                 ->get();
         }
 
+        if ($section === 'etat-commande') {
+            $commandes = Commande::query()->with('partenaire')->latest()->get();
+            $partenaires = Partenaire::query()->orderBy('nom_client')->get();
+            $commandeStats = [
+                'total' => $commandes->count(),
+                'total_paiement' => (float) $commandes->where('etat', 'payee')->sum('montant_total'),
+                'confirmee' => $commandes->where('statue', 'confirmee')->count(),
+                'retour' => $commandes->where('statue', 'retour')->count(),
+                'annulee' => $commandes->where('statue', 'annulee')->count(),
+            ];
+        }
+
         return view('admin.dashboard', [
             'user' => session('auth_user'),
             'section' => $section,
@@ -533,6 +642,8 @@ class AdminController extends Controller
             'livreurs' => $livreurs,
             'etatLivraisons' => $etatLivraisons,
             'utilisateurs' => $utilisateurs,
+            'commandes' => $commandes,
+            'commandeStats' => $commandeStats,
             'mapPoints' => $mapPoints,
         ]);
     }

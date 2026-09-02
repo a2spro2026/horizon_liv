@@ -641,6 +641,10 @@
             margin-bottom: 1.35rem;
         }
 
+        .cards.cards--stats {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
         .card {
             position: relative;
             overflow: hidden;
@@ -1093,6 +1097,42 @@
         html[data-theme="dark"] .etat-badge.retour { color: #fcd34d; }
         html[data-theme="dark"] .etat-badge.reportee { color: #93c5fd; }
 
+        .pay-badge {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .pay-badge.payee {
+            background: rgba(34, 197, 94, 0.18);
+            color: #16a34a;
+        }
+
+        .pay-badge.non_payee {
+            background: rgba(239, 68, 68, 0.18);
+            color: #dc2626;
+        }
+
+        html[data-theme="dark"] .pay-badge.payee { color: #86efac; }
+        html[data-theme="dark"] .pay-badge.non_payee { color: #fca5a5; }
+
+        .card.card--cmd-total::before { background: linear-gradient(180deg, #fb923c, #ea580c); }
+        .card.card--cmd-pay::before { background: linear-gradient(180deg, #34d399, #059669); }
+        .card.card--cmd-ok::before { background: linear-gradient(180deg, #60a5fa, #2563eb); }
+        .card.card--cmd-retour::before { background: linear-gradient(180deg, #fbbf24, #d97706); }
+        .card.card--cmd-cancel::before { background: linear-gradient(180deg, #f87171, #dc2626); }
+
+        .icon-btn.danger {
+            color: #ef4444;
+        }
+
+        .icon-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.14);
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
         .livreurs-map-wrap {
             position: relative;
             border-radius: 14px;
@@ -1378,6 +1418,7 @@
 
         @media (max-width: 980px) {
             .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .cards.cards--stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .nav-links { display: none; }
             .layout { grid-template-columns: 1fr; }
             .sidebar {
@@ -1411,11 +1452,13 @@
     @php
         $destinataireSections = ['fiche-destinataire', 'historique-livraison', 'balances-paiement'];
         $livreurSections = ['fiche-livreur', 'etat-livraison', 'carte-livreurs'];
+        $commandeSections = ['etat-commande', 'balance-commande'];
         $configSections = ['utilisateur', 'configurations'];
         $compactSections = array_merge(
             ['fiche-partenaire', 'balance-partenaire'],
             $destinataireSections,
             $livreurSections,
+            $commandeSections,
             $configSections
         );
         $titles = [
@@ -1428,6 +1471,8 @@
             'historique-livraison' => 'Historique Livraison',
             'balances-paiement' => 'Balances Paiement',
             'commandes' => 'Commandes',
+            'etat-commande' => 'Etat Commande',
+            'balance-commande' => 'Balance Commande',
             'paiement' => 'État Paiement',
             'parametres' => 'Paramètres',
             'admin' => 'Admin',
@@ -1647,13 +1692,34 @@
                         </li>
                     </ul>
                 </li>
-                <li>
-                    <a href="{{ route('admin.section', 'commandes') }}" class="{{ $section === 'commandes' ? 'active' : '' }}">
-                        <span class="side-ico" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9 5-9-5 9-5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+                <li class="side-group {{ in_array($section, $commandeSections, true) ? 'open has-active' : '' }}" id="commandes-group">
+                    <button type="button" class="side-parent" id="commandes-toggle" aria-expanded="{{ in_array($section, $commandeSections, true) ? 'true' : 'false' }}">
+                        <span class="side-parent-left">
+                            <span class="side-ico" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9 5-9-5 9-5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+                            </span>
+                            Commandes
                         </span>
-                        Commandes
-                    </a>
+                        <span class="side-caret" aria-hidden="true"></span>
+                    </button>
+                    <ul class="sub-links">
+                        <li>
+                            <a href="{{ route('admin.section', 'etat-commande') }}" class="{{ $section === 'etat-commande' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                </span>
+                                Etat Commande
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.section', 'balance-commande') }}" class="{{ $section === 'balance-commande' ? 'active' : '' }}">
+                                <span class="sub-ico" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h4a3 3 0 0 1 0 6H5m14-3h-5a3 3 0 0 0 0 6h5"/></svg>
+                                </span>
+                                Balance Commande
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <a href="{{ route('admin.section', 'paiement') }}" class="{{ $section === 'paiement' ? 'active' : '' }}">
@@ -1762,7 +1828,7 @@
                 </div>
             @endif
 
-            <section class="panel {{ in_array($section, ['dashboard', 'fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur', 'etat-livraison', 'carte-livreurs', 'utilisateur'], true) ? 'is-flush' : '' }}">
+            <section class="panel {{ in_array($section, ['dashboard', 'fiche-partenaire', 'fiche-destinataire', 'historique-livraison', 'balances-paiement', 'fiche-livreur', 'etat-livraison', 'carte-livreurs', 'etat-commande', 'balance-commande', 'utilisateur'], true) ? 'is-flush' : '' }}">
                 @if ($section === 'dashboard')
                     @include('admin.partials.livreurs-map', [
                         'mapPoints' => $mapPoints ?? [],
@@ -2570,11 +2636,256 @@
                         </div>
                     @endif
 
+                @elseif ($section === 'etat-commande')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Commandes</small>
+                                Etat Commande
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-add" id="open-add-commande">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="cards cards--stats">
+                        <article class="card card--cmd-total">
+                            <div class="card-top">
+                                <span class="card-ico" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9 5-9-5 9-5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+                                </span>
+                                <span class="card-chip">Total</span>
+                            </div>
+                            <div class="label">Nbr Commande</div>
+                            <div class="value">{{ $commandeStats['total'] ?? 0 }}</div>
+                        </article>
+                        <article class="card card--cmd-pay">
+                            <div class="card-top">
+                                <span class="card-ico" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                                </span>
+                                <span class="card-chip">MAD</span>
+                            </div>
+                            <div class="label">Total Paiement</div>
+                            <div class="value">{{ number_format((float) ($commandeStats['total_paiement'] ?? 0), 2, '.', ' ') }}</div>
+                        </article>
+                        <article class="card card--cmd-ok">
+                            <div class="card-top">
+                                <span class="card-ico" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+                                </span>
+                                <span class="card-chip">OK</span>
+                            </div>
+                            <div class="label">Cmd Confirmées</div>
+                            <div class="value">{{ $commandeStats['confirmee'] ?? 0 }}</div>
+                        </article>
+                        <article class="card card--cmd-retour">
+                            <div class="card-top">
+                                <span class="card-ico" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h13l-3-3M16 14H3l3 3"/></svg>
+                                </span>
+                                <span class="card-chip">Retour</span>
+                            </div>
+                            <div class="label">Cmd Retour</div>
+                            <div class="value">{{ $commandeStats['retour'] ?? 0 }}</div>
+                        </article>
+                        <article class="card card--cmd-cancel">
+                            <div class="card-top">
+                                <span class="card-ico" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                </span>
+                                <span class="card-chip">Annul</span>
+                            </div>
+                            <div class="label">Cmd Annulées</div>
+                            <div class="value">{{ $commandeStats['annulee'] ?? 0 }}</div>
+                        </article>
+                    </div>
+
+                    <div class="add-panel" id="add-commande-panel">
+                        <h4>Nouvelle commande</h4>
+                        <form method="POST" action="{{ route('admin.commandes.store') }}">
+                            @csrf
+                            <div class="add-grid">
+                                <div class="field">
+                                    <label for="add_c_partenaire">Partenaire</label>
+                                    <select id="add_c_partenaire" name="partenaire_id" required>
+                                        <option value="">Choisir</option>
+                                        @foreach ($partenaires ?? [] as $p)
+                                            <option value="{{ $p->id }}">{{ $p->id }} — {{ $p->nom_client }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_dest">Nom Destinataire</label>
+                                    <input id="add_c_dest" type="text" name="nom_destinataire" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_contact">Contact Destinataire</label>
+                                    <input id="add_c_contact" type="text" name="contact_destinataire" placeholder="00212..." required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_montant">Montant Total</label>
+                                    <input id="add_c_montant" type="number" name="montant_total" min="0" step="0.01" required>
+                                </div>
+                                <div class="field" style="grid-column: 1 / -1;">
+                                    <label for="add_c_adresse">Adresse</label>
+                                    <input id="add_c_adresse" type="text" name="adresse" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_statue">Statue</label>
+                                    <select id="add_c_statue" name="statue" required>
+                                        <option value="confirmee">Confirmée</option>
+                                        <option value="retour">Retour</option>
+                                        <option value="reportee">Reportée</option>
+                                        <option value="annulee">Annulée</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_etat">Etat</label>
+                                    <select id="add_c_etat" name="etat" required>
+                                        <option value="non_payee">Non Payée</option>
+                                        <option value="payee">Payée</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="add-actions">
+                                <button type="submit" class="btn btn-add">Valider</button>
+                                <button type="button" class="btn btn-close" id="close-add-commande">Fermer</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if (($commandes ?? collect())->isEmpty())
+                        <div id="commandes-list">
+                            <p class="empty-state">Aucune commande pour le moment.</p>
+                        </div>
+                    @else
+                        <div class="table-wrap" id="commandes-list">
+                            <table class="data-table" id="commandes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>N° Cmd</th>
+                                        <th>ID Partenaire</th>
+                                        <th>Nom Partenaire</th>
+                                        <th>Nom Destinataire</th>
+                                        <th>Contact Destinataire</th>
+                                        <th>Adresse</th>
+                                        <th>Montant Total</th>
+                                        <th>Statue</th>
+                                        <th>Etat</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($commandes as $c)
+                                        <tr
+                                            data-id="{{ $c->id }}"
+                                            data-numero="{{ $c->numero_cmd }}"
+                                            data-date="{{ $c->created_at->format('d/m/Y') }}"
+                                            data-partenaire-id="{{ $c->partenaire_id }}"
+                                            data-partenaire="{{ $c->nom_partenaire }}"
+                                            data-dest="{{ $c->nom_destinataire }}"
+                                            data-contact="{{ $c->contact_destinataire }}"
+                                            data-adresse="{{ $c->adresse }}"
+                                            data-montant="{{ number_format((float) $c->montant_total, 2, '.', ' ') }}"
+                                            data-montant-raw="{{ $c->montant_total }}"
+                                            data-statue="{{ $c->statue }}"
+                                            data-etat="{{ $c->etat }}"
+                                        >
+                                            <td>{{ $c->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $c->numero_cmd }}</td>
+                                            <td>{{ $c->partenaire_id ?? '—' }}</td>
+                                            <td>{{ $c->nom_partenaire }}</td>
+                                            <td>{{ $c->nom_destinataire }}</td>
+                                            <td>{{ $c->contact_destinataire }}</td>
+                                            <td>{{ $c->adresse }}</td>
+                                            <td>{{ number_format((float) $c->montant_total, 2, '.', ' ') }}</td>
+                                            <td>
+                                                <span class="etat-badge {{ $c->statue }}">
+                                                    {{ \App\Models\Commande::statueLabel($c->statue) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="pay-badge {{ $c->etat }}">
+                                                    {{ \App\Models\Commande::etatLabel($c->etat) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button type="button" class="icon-btn" title="Voir" onclick="openCommandeModal('view', this.closest('tr'))" aria-label="Voir">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Modifier" onclick="openCommandeModal('edit', this.closest('tr'))" aria-label="Modifier">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                    </button>
+                                                    <button type="button" class="icon-btn" title="Imprimer" onclick="printCommandeRow(this.closest('tr'))" aria-label="Imprimer">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+                                                    </button>
+                                                    <form method="POST" action="{{ route('admin.commandes.destroy', $c) }}" onsubmit="return confirm('Supprimer cette commande ?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="icon-btn danger" title="Supprimer" aria-label="Supprimer">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                @elseif ($section === 'balance-commande')
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <span class="section-title-ico" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 3v18M5 8h4a3 3 0 0 1 0 6H5m14-3h-5a3 3 0 0 0 0 6h5"/>
+                                </svg>
+                            </span>
+                            <span class="section-title-text">
+                                <small>Commandes</small>
+                                Balance Commande
+                            </span>
+                        </h3>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-print" onclick="window.print()">Imprimer</button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-close">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                                Fermer
+                            </a>
+                        </div>
+                    </div>
+                    <p class="empty-state">Aucune balance commande à afficher pour le moment.</p>
+
                 @else
                     <h3>{{ $title }}</h3>
                     <p>
                         @switch($section)
-                            @case('commandes') Suivez et traitez les commandes en cours. @break
+                            @case('etat-commande') Suivez l'état des commandes en cours. @break
+                            @case('balance-commande') Consultez la balance des commandes. @break
                             @case('paiement') Consultez l’état des paiements et règlements. @break
                             @case('parametres') Configurez les paramètres généraux de la plateforme. @break
                             @case('livreurs') Gérez le réseau de livreurs Horizon Post. @break
@@ -2707,6 +3018,51 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="commande-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h3 id="commande-modal-title">Commande</h3>
+            <form method="POST" id="commande-form">
+                @csrf
+                @method('PUT')
+                <div class="field"><label>Date</label><input id="c_date" type="text" disabled></div>
+                <div class="field"><label>N° Cmd</label><input id="c_numero" type="text" disabled></div>
+                <div class="field">
+                    <label for="c_partenaire">Partenaire</label>
+                    <select id="c_partenaire" name="partenaire_id" required>
+                        @foreach ($partenaires ?? [] as $p)
+                            <option value="{{ $p->id }}">{{ $p->id }} — {{ $p->nom_client }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="field"><label for="c_dest">Nom Destinataire</label><input id="c_dest" name="nom_destinataire" type="text" required></div>
+                <div class="field"><label for="c_contact">Contact Destinataire</label><input id="c_contact" name="contact_destinataire" type="text" required></div>
+                <div class="field"><label for="c_adresse">Adresse</label><input id="c_adresse" name="adresse" type="text" required></div>
+                <div class="field"><label for="c_montant">Montant Total</label><input id="c_montant" name="montant_total" type="number" min="0" step="0.01" required></div>
+                <div class="field">
+                    <label for="c_statue">Statue</label>
+                    <select id="c_statue" name="statue" required>
+                        <option value="confirmee">Confirmée</option>
+                        <option value="retour">Retour</option>
+                        <option value="reportee">Reportée</option>
+                        <option value="annulee">Annulée</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="c_etat">Etat</label>
+                    <select id="c_etat" name="etat" required>
+                        <option value="non_payee">Non Payée</option>
+                        <option value="payee">Payée</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-close" onclick="closeCommandeModal()">Fermer</button>
+                    <button type="button" class="btn btn-add" onclick="printCommandeModal()">Imprimer</button>
+                    <button type="submit" class="btn btn-add" id="commande-modal-save">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const toggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -2747,6 +3103,16 @@
             livreursToggle.setAttribute(
                 'aria-expanded',
                 livreursGroup.classList.contains('open') ? 'true' : 'false'
+            );
+        });
+
+        const commandesToggle = document.getElementById('commandes-toggle');
+        const commandesGroup = document.getElementById('commandes-group');
+        commandesToggle?.addEventListener('click', () => {
+            commandesGroup.classList.toggle('open');
+            commandesToggle.setAttribute(
+                'aria-expanded',
+                commandesGroup.classList.contains('open') ? 'true' : 'false'
             );
         });
 
@@ -2802,6 +3168,17 @@
         document.getElementById('close-add-utilisateur')?.addEventListener('click', () => {
             addUtilisateurPanel?.classList.remove('open');
             if (utilisateursList) utilisateursList.style.display = '';
+        });
+
+        const addCommandePanel = document.getElementById('add-commande-panel');
+        const commandesList = document.getElementById('commandes-list');
+        document.getElementById('open-add-commande')?.addEventListener('click', () => {
+            addCommandePanel?.classList.add('open');
+            if (commandesList) commandesList.style.display = 'none';
+        });
+        document.getElementById('close-add-commande')?.addEventListener('click', () => {
+            addCommandePanel?.classList.remove('open');
+            if (commandesList) commandesList.style.display = '';
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
@@ -2962,6 +3339,49 @@
 
         document.getElementById('etat-livraison-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'etat-livraison-modal') closeEtatLivraisonModal();
+        });
+
+        function openCommandeModal(mode, row) {
+            const modal = document.getElementById('commande-modal');
+            const form = document.getElementById('commande-form');
+            const id = row.dataset.id;
+            form.action = `/admin/commandes/${id}`;
+
+            document.getElementById('c_date').value = row.dataset.date;
+            document.getElementById('c_numero').value = row.dataset.numero;
+            document.getElementById('c_partenaire').value = row.dataset.partenaireId || '';
+            document.getElementById('c_dest').value = row.dataset.dest;
+            document.getElementById('c_contact').value = row.dataset.contact;
+            document.getElementById('c_adresse').value = row.dataset.adresse;
+            document.getElementById('c_montant').value = row.dataset.montantRaw || row.dataset.montant?.replace(/\s/g, '') || '';
+            document.getElementById('c_statue').value = row.dataset.statue || 'confirmee';
+            document.getElementById('c_etat').value = row.dataset.etat || 'non_payee';
+
+            const editable = mode === 'edit';
+            ['c_partenaire', 'c_dest', 'c_contact', 'c_adresse', 'c_montant', 'c_statue', 'c_etat'].forEach((fid) => {
+                document.getElementById(fid).disabled = !editable;
+            });
+
+            document.getElementById('commande-modal-title').textContent = editable ? 'Modifier commande' : 'Voir commande';
+            document.getElementById('commande-modal-save').style.display = editable ? 'inline-block' : 'none';
+            modal.classList.add('open');
+        }
+
+        function closeCommandeModal() {
+            document.getElementById('commande-modal').classList.remove('open');
+        }
+
+        function printCommandeRow(row) {
+            openCommandeModal('view', row);
+            setTimeout(() => window.print(), 150);
+        }
+
+        function printCommandeModal() {
+            window.print();
+        }
+
+        document.getElementById('commande-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'commande-modal') closeCommandeModal();
         });
     </script>
 </body>

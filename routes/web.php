@@ -39,6 +39,12 @@ Route::put('/admin/utilisateurs/{utilisateur}', [AdminController::class, 'update
     ->name('admin.utilisateurs.update');
 Route::patch('/admin/utilisateurs/{utilisateur}/suspendre', [AdminController::class, 'suspendUtilisateur'])
     ->name('admin.utilisateurs.suspend');
+Route::post('/admin/commandes', [AdminController::class, 'storeCommande'])
+    ->name('admin.commandes.store');
+Route::put('/admin/commandes/{commande}', [AdminController::class, 'updateCommande'])
+    ->name('admin.commandes.update');
+Route::delete('/admin/commandes/{commande}', [AdminController::class, 'destroyCommande'])
+    ->name('admin.commandes.destroy');
 Route::post('/api/livreur/position', [AdminController::class, 'updateLivreurPosition'])
     ->name('api.livreur.position');
 Route::post('/api/destinataire/position', [AdminController::class, 'updateDestinatairePosition'])
