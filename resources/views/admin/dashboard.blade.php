@@ -2770,7 +2770,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="field" style="grid-column: 1 / -1;">
+                                <div class="field">
                                     <label for="add_c_adresse">Adresse</label>
                                     <input id="add_c_adresse" type="text" name="adresse" required>
                                 </div>
