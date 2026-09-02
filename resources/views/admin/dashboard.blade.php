@@ -2724,11 +2724,25 @@
                             @csrf
                             <div class="add-grid">
                                 <div class="field">
-                                    <label for="add_c_partenaire">Partenaire</label>
+                                    <label for="add_c_partenaire">ID Partenaire</label>
                                     <select id="add_c_partenaire" name="partenaire_id" required>
                                         <option value="">Choisir</option>
                                         @foreach ($partenaires ?? [] as $p)
                                             <option value="{{ $p->id }}">{{ $p->id }} — {{ $p->nom_client }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_destinataire">ID Destinataire</label>
+                                    <select id="add_c_destinataire" name="destinataire_id">
+                                        <option value="">— Créer nouveau —</option>
+                                        @foreach ($destinataires ?? [] as $d)
+                                            <option
+                                                value="{{ $d->id }}"
+                                                data-nom="{{ $d->nom_complet }}"
+                                                data-contact="{{ $d->contact }}"
+                                                data-ville="{{ $d->ville }}"
+                                            >{{ $d->id }} — {{ $d->nom_complet }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -2741,8 +2755,20 @@
                                     <input id="add_c_contact" type="text" name="contact_destinataire" placeholder="00212..." required>
                                 </div>
                                 <div class="field">
+                                    <label for="add_c_ville">Ville</label>
+                                    <input id="add_c_ville" type="text" name="ville" required>
+                                </div>
+                                <div class="field">
                                     <label for="add_c_montant">Montant Total</label>
                                     <input id="add_c_montant" type="number" name="montant_total" min="0" step="0.01" required>
+                                </div>
+                                <div class="field">
+                                    <label for="add_c_mode">Mode Paiement</label>
+                                    <select id="add_c_mode" name="mode_paiement" required>
+                                        @foreach (\App\Models\Commande::modePaiementOptions() as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="field" style="grid-column: 1 / -1;">
                                     <label for="add_c_adresse">Adresse</label>
@@ -2784,11 +2810,13 @@
                                         <th>Date</th>
                                         <th>N° Cmd</th>
                                         <th>ID Partenaire</th>
+                                        <th>ID Destinataire</th>
                                         <th>Nom Partenaire</th>
                                         <th>Nom Destinataire</th>
                                         <th>Contact Destinataire</th>
                                         <th>Adresse</th>
                                         <th>Montant Total</th>
+                                        <th>Mode Paiement</th>
                                         <th>Statue</th>
                                         <th>Etat</th>
                                         <th>Actions</th>
@@ -2801,23 +2829,28 @@
                                             data-numero="{{ $c->numero_cmd }}"
                                             data-date="{{ $c->created_at->format('d/m/Y') }}"
                                             data-partenaire-id="{{ $c->partenaire_id }}"
+                                            data-destinataire-id="{{ $c->destinataire_id }}"
                                             data-partenaire="{{ $c->nom_partenaire }}"
                                             data-dest="{{ $c->nom_destinataire }}"
                                             data-contact="{{ $c->contact_destinataire }}"
+                                            data-ville="{{ $c->destinataire?->ville ?? '' }}"
                                             data-adresse="{{ $c->adresse }}"
                                             data-montant="{{ number_format((float) $c->montant_total, 2, '.', ' ') }}"
                                             data-montant-raw="{{ $c->montant_total }}"
+                                            data-mode="{{ $c->mode_paiement ?? 'esp' }}"
                                             data-statue="{{ $c->statue }}"
                                             data-etat="{{ $c->etat }}"
                                         >
                                             <td>{{ $c->created_at->format('d/m/Y') }}</td>
                                             <td>{{ $c->numero_cmd }}</td>
                                             <td>{{ $c->partenaire_id ?? '—' }}</td>
+                                            <td>{{ $c->destinataire_id ?? '—' }}</td>
                                             <td>{{ $c->nom_partenaire }}</td>
                                             <td>{{ $c->nom_destinataire }}</td>
                                             <td>{{ $c->contact_destinataire }}</td>
                                             <td>{{ $c->adresse }}</td>
                                             <td>{{ number_format((float) $c->montant_total, 2, '.', ' ') }}</td>
+                                            <td>{{ \App\Models\Commande::modePaiementLabel($c->mode_paiement ?? 'esp') }}</td>
                                             <td>
                                                 <span class="etat-badge {{ $c->statue }}">
                                                     {{ \App\Models\Commande::statueLabel($c->statue) }}
@@ -3027,17 +3060,40 @@
                 <div class="field"><label>Date</label><input id="c_date" type="text" disabled></div>
                 <div class="field"><label>N° Cmd</label><input id="c_numero" type="text" disabled></div>
                 <div class="field">
-                    <label for="c_partenaire">Partenaire</label>
+                    <label for="c_partenaire">ID Partenaire</label>
                     <select id="c_partenaire" name="partenaire_id" required>
                         @foreach ($partenaires ?? [] as $p)
                             <option value="{{ $p->id }}">{{ $p->id }} — {{ $p->nom_client }}</option>
                         @endforeach
                     </select>
                 </div>
+                <div class="field">
+                    <label for="c_destinataire">ID Destinataire</label>
+                    <select id="c_destinataire" name="destinataire_id">
+                        <option value="">— Créer nouveau —</option>
+                        @foreach ($destinataires ?? [] as $d)
+                            <option
+                                value="{{ $d->id }}"
+                                data-nom="{{ $d->nom_complet }}"
+                                data-contact="{{ $d->contact }}"
+                                data-ville="{{ $d->ville }}"
+                            >{{ $d->id }} — {{ $d->nom_complet }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="field"><label for="c_dest">Nom Destinataire</label><input id="c_dest" name="nom_destinataire" type="text" required></div>
                 <div class="field"><label for="c_contact">Contact Destinataire</label><input id="c_contact" name="contact_destinataire" type="text" required></div>
+                <div class="field"><label for="c_ville">Ville</label><input id="c_ville" name="ville" type="text" required></div>
                 <div class="field"><label for="c_adresse">Adresse</label><input id="c_adresse" name="adresse" type="text" required></div>
                 <div class="field"><label for="c_montant">Montant Total</label><input id="c_montant" name="montant_total" type="number" min="0" step="0.01" required></div>
+                <div class="field">
+                    <label for="c_mode">Mode Paiement</label>
+                    <select id="c_mode" name="mode_paiement" required>
+                        @foreach (\App\Models\Commande::modePaiementOptions() as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="field">
                     <label for="c_statue">Statue</label>
                     <select id="c_statue" name="statue" required>
@@ -3179,6 +3235,27 @@
         document.getElementById('close-add-commande')?.addEventListener('click', () => {
             addCommandePanel?.classList.remove('open');
             if (commandesList) commandesList.style.display = '';
+        });
+
+        function fillDestinataireFields(selectEl, prefix) {
+            const option = selectEl?.selectedOptions?.[0];
+            const nom = document.getElementById(`${prefix}_dest`);
+            const contact = document.getElementById(`${prefix}_contact`);
+            const ville = document.getElementById(`${prefix}_ville`);
+            if (!option || !option.value) {
+                return;
+            }
+            if (nom) nom.value = option.dataset.nom || '';
+            if (contact) contact.value = option.dataset.contact || '';
+            if (ville) ville.value = option.dataset.ville || '';
+        }
+
+        document.getElementById('add_c_destinataire')?.addEventListener('change', (e) => {
+            fillDestinataireFields(e.target, 'add_c');
+        });
+
+        document.getElementById('c_destinataire')?.addEventListener('change', (e) => {
+            fillDestinataireFields(e.target, 'c');
         });
 
         document.querySelectorAll('.statut-select').forEach((select) => {
@@ -3350,15 +3427,18 @@
             document.getElementById('c_date').value = row.dataset.date;
             document.getElementById('c_numero').value = row.dataset.numero;
             document.getElementById('c_partenaire').value = row.dataset.partenaireId || '';
+            document.getElementById('c_destinataire').value = row.dataset.destinataireId || '';
             document.getElementById('c_dest').value = row.dataset.dest;
             document.getElementById('c_contact').value = row.dataset.contact;
+            document.getElementById('c_ville').value = row.dataset.ville || '';
             document.getElementById('c_adresse').value = row.dataset.adresse;
             document.getElementById('c_montant').value = row.dataset.montantRaw || row.dataset.montant?.replace(/\s/g, '') || '';
+            document.getElementById('c_mode').value = row.dataset.mode || 'esp';
             document.getElementById('c_statue').value = row.dataset.statue || 'confirmee';
             document.getElementById('c_etat').value = row.dataset.etat || 'non_payee';
 
             const editable = mode === 'edit';
-            ['c_partenaire', 'c_dest', 'c_contact', 'c_adresse', 'c_montant', 'c_statue', 'c_etat'].forEach((fid) => {
+            ['c_partenaire', 'c_destinataire', 'c_dest', 'c_contact', 'c_ville', 'c_adresse', 'c_montant', 'c_mode', 'c_statue', 'c_etat'].forEach((fid) => {
                 document.getElementById(fid).disabled = !editable;
             });
 

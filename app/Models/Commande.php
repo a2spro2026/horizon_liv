@@ -10,11 +10,13 @@ class Commande extends Model
     protected $fillable = [
         'numero_cmd',
         'partenaire_id',
+        'destinataire_id',
         'nom_partenaire',
         'nom_destinataire',
         'contact_destinataire',
         'adresse',
         'montant_total',
+        'mode_paiement',
         'statue',
         'etat',
     ];
@@ -26,6 +28,33 @@ class Commande extends Model
     public function partenaire(): BelongsTo
     {
         return $this->belongsTo(Partenaire::class);
+    }
+
+    public function destinataire(): BelongsTo
+    {
+        return $this->belongsTo(Destinataire::class);
+    }
+
+    public static function modePaiementLabel(string $mode): string
+    {
+        return match ($mode) {
+            'esp' => 'Esp',
+            'chq' => 'Chq',
+            'vir' => 'Vir',
+            'vers' => 'Vers',
+            default => $mode,
+        };
+    }
+
+    /** @return array<string, string> */
+    public static function modePaiementOptions(): array
+    {
+        return [
+            'esp' => 'Esp',
+            'chq' => 'Chq',
+            'vir' => 'Vir',
+            'vers' => 'Vers',
+        ];
     }
 
     public static function statueLabel(string $statue): string

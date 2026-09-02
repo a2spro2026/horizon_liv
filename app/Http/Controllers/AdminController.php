@@ -346,24 +346,30 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'partenaire_id' => 'required|exists:partenaires,id',
+            'destinataire_id' => 'nullable|exists:destinataires,id',
             'nom_destinataire' => 'required|string|max:255',
             'contact_destinataire' => 'required|string|max:30',
+            'ville' => 'required|string|max:255',
             'adresse' => 'required|string|max:255',
             'montant_total' => 'required|numeric|min:0',
+            'mode_paiement' => 'required|in:esp,chq,vir,vers',
             'statue' => 'required|in:confirmee,retour,reportee,annulee',
             'etat' => 'required|in:payee,non_payee',
         ]);
 
         $partenaire = Partenaire::query()->findOrFail($validated['partenaire_id']);
+        $destinataire = $this->resolveCommandeDestinataire($validated);
 
         Commande::create([
             'numero_cmd' => Commande::generateNumero(),
             'partenaire_id' => $partenaire->id,
+            'destinataire_id' => $destinataire->id,
             'nom_partenaire' => $partenaire->nom_client,
-            'nom_destinataire' => $validated['nom_destinataire'],
-            'contact_destinataire' => $validated['contact_destinataire'],
+            'nom_destinataire' => $destinataire->nom_complet,
+            'contact_destinataire' => $destinataire->contact,
             'adresse' => $validated['adresse'],
             'montant_total' => $validated['montant_total'],
+            'mode_paiement' => $validated['mode_paiement'],
             'statue' => $validated['statue'],
             'etat' => $validated['etat'],
         ]);
@@ -381,23 +387,35 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'partenaire_id' => 'required|exists:partenaires,id',
+            'destinataire_id' => 'nullable|exists:destinataires,id',
             'nom_destinataire' => 'required|string|max:255',
             'contact_destinataire' => 'required|string|max:30',
+            'ville' => 'required|string|max:255',
             'adresse' => 'required|string|max:255',
             'montant_total' => 'required|numeric|min:0',
+            'mode_paiement' => 'required|in:esp,chq,vir,vers',
             'statue' => 'required|in:confirmee,retour,reportee,annulee',
             'etat' => 'required|in:payee,non_payee',
         ]);
 
         $partenaire = Partenaire::query()->findOrFail($validated['partenaire_id']);
+        $destinataire = $this->resolveCommandeDestinataire($validated, $commande->destinataire);
+
+        $destinataire->update([
+            'nom_complet' => $validated['nom_destinataire'],
+            'contact' => $validated['contact_destinataire'],
+            'ville' => $validated['ville'],
+        ]);
 
         $commande->update([
             'partenaire_id' => $partenaire->id,
+            'destinataire_id' => $destinataire->id,
             'nom_partenaire' => $partenaire->nom_client,
-            'nom_destinataire' => $validated['nom_destinataire'],
-            'contact_destinataire' => $validated['contact_destinataire'],
+            'nom_destinataire' => $destinataire->nom_complet,
+            'contact_destinataire' => $destinataire->contact,
             'adresse' => $validated['adresse'],
             'montant_total' => $validated['montant_total'],
+            'mode_paiement' => $validated['mode_paiement'],
             'statue' => $validated['statue'],
             'etat' => $validated['etat'],
         ]);
@@ -620,8 +638,9 @@ class AdminController extends Controller
         }
 
         if ($section === 'etat-commande') {
-            $commandes = Commande::query()->with('partenaire')->latest()->get();
+            $commandes = Commande::query()->with(['partenaire', 'destinataire'])->latest()->get();
             $partenaires = Partenaire::query()->orderBy('nom_client')->get();
+            $destinataires = Destinataire::query()->orderBy('nom_complet')->get();
             $commandeStats = [
                 'total' => $commandes->count(),
                 'total_paiement' => (float) $commandes->where('etat', 'payee')->sum('montant_total'),
@@ -654,6 +673,25 @@ class AdminController extends Controller
     private function coordsFromVille(string $ville): array
     {
         return $this->coordsFromAdresse(null, $ville);
+    }
+
+    private function resolveCommandeDestinataire(array $validated, ?Destinataire $current = null): Destinataire
+    {
+        if (! empty($validated['destinataire_id'])) {
+            return Destinataire::query()->findOrFail($validated['destinataire_id']);
+        }
+
+        if ($current) {
+            return $current;
+        }
+
+        return Destinataire::create([
+            'nom_complet' => $validated['nom_destinataire'],
+            'contact' => $validated['contact_destinataire'],
+            'ville' => $validated['ville'],
+            'activite' => 'Commande',
+            ...$this->coordsFromVille($validated['ville']),
+        ]);
     }
 
     /**
